@@ -14,4 +14,8 @@ plugins:
 custom:
   pythonRequirements:
     slim: true
-    dockerizePip: true
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
