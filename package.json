@@ -1,0 +1,23 @@
+{
+  "name": "corona-scraper-nrw",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wdr-data/python_covid19_nrw.git"
+  },
+  "author": "p3nny",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wdr-data/python_covid19_nrw/issues"
+  },
+  "homepage": "https://github.com/wdr-data/python_covid19_nrw#readme",
+  "dependencies": {
+    "serverless": "^1.67.0",
+    "serverless-python-requirements": "^5.1.0"
+  }
+}
