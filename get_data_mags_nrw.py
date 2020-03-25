@@ -72,11 +72,16 @@ def clear_data():
     df = df.replace(regex=r' +\(Kreis\)', value='')
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
-    print(df)
+    return df
 
 
-# Needs to be corrected
-def write_data():
-    bytes_to_write = df.to_csv(None).encode('utf-8')
-    with open('https://coronanrw.s3.eu-central-1.amazonaws.com/insolvenzen_kreise_2018.csv', 'wb') as f:
-        f.write(bytes_to_write)
+def write_data_nrw():
+    filename = 's3://coronanrw/corona_mags_nrw.csv'
+    df = clear_data()
+    write = df.to_csv(index=False)
+    fs = s3fs.S3FileSystem()
+    with fs.open(filename, 'w') as f:
+        f.write(write)
+    fs.setxattr(filename,
+                copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
+    fs.chmod(filename, 'public-read')

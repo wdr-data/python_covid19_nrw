@@ -1,10 +1,11 @@
 import json
-from get_data import get_data
-from get_data import clear_data
+from get_data_mags_nrw import write_data_nrw
+from get_data_rki import write_data_rki
 
 
 def hello(event, context):
-    clear_data()
+    write_data_nrw()
+    write_data_rki()
 
     body = {
         "message": "Go Serverless v1.0! Your function executed successfully!",
