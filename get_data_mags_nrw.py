@@ -74,7 +74,6 @@ def clear_data():
     df = df.replace(regex=r' +\(Kreis\)', value='')
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
-    print(df)
     return df
 
 
