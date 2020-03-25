@@ -2,6 +2,7 @@ service: corona-scraper-nrw
 
 provider:
   name: aws
+  region: eu-central-1
   runtime: python3.8
   stage: staging
   iamRoleStatements:
