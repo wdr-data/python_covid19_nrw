@@ -11,7 +11,7 @@ provider:
     - Effect: Allow
       Action:
         - s3:*
-      Resource: "arn:aws:s3:::coronanrw-${self:provider.stage}"
+      Resource: "arn:aws:s3:::coronanrw-${self:provider.stage}/*"
 
 functions:
   scrape:
