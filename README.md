@@ -15,6 +15,7 @@
 - automate deploy
 
 ## How to test locally
+- Run the get_data - Skript
 -
 
 ## Automated tests

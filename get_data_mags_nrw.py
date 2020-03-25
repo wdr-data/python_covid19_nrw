@@ -1,3 +1,4 @@
+import os
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup as bs
@@ -67,12 +68,17 @@ def get_data():
 
 def clear_data():
     df = get_data()
+    df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
     df = df.replace('Mülheim / Ruhr', 'Mülheim an der Ruhr')
     df = df.replace(regex=r' +\(Kreis\)', value='')
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
+    print(df)
     return df
+
+
+# clear_data()
 
 
 def write_data_nrw():
