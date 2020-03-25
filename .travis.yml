@@ -2,8 +2,8 @@ language: python
 
 sudo: false
 
-node_js:
-  - 12
+python:
+  - "3.8"
 
 env:
   global:
@@ -13,6 +13,8 @@ env:
 cache: yarn
 
 before_script:
+  - nvm install 12
+  - nvm use 12
   - yarn
 
 skript: echo "no tests 😟"
