@@ -1,11 +1,10 @@
 import json
-import numpy as np
+from get_data import get_data
+from get_data import clear_data
 
 
 def hello(event, context):
-    a = np.arange(15).reshape(3, 5)
-    print("Your numpy array:")
-    print(a)
+    clear_data()
 
     body = {
         "message": "Go Serverless v1.0! Your function executed successfully!",
@@ -18,6 +17,7 @@ def hello(event, context):
     }
 
     return response
+
 
 if __name__ == "__main__":
     hello('', '')
