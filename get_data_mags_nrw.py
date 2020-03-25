@@ -76,7 +76,7 @@ def clear_data():
 
 
 def write_data_nrw():
-    filename = 's3://coronanrw/corona_mags_nrw.csv'
+    filename = f's3://{os.environ["BUCKET_NAME"]}/corona_mags_nrw.csv'
     df = clear_data()
     write = df.to_csv(index=False)
     fs = s3fs.S3FileSystem()

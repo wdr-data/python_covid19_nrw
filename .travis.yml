@@ -7,7 +7,6 @@ python:
 
 env:
   global:
-    - ENV_BUCKET_NAME=coronanrw
     - AWS_REGION=eu-central-1
 
 cache: yarn
@@ -22,11 +21,11 @@ skript: echo "no tests 😟"
 deploy:
   - provider: script
     skip_cleanup: true
-    script: yarn serverless deploy
+    script: STAGE=staging yarn serverless deploy
     on:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: yarn serverless deploy
+    script: STAGE=prod yarn serverless deploy
     on:
       branch: production

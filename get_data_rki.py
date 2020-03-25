@@ -7,7 +7,7 @@ def clear_data():
 
 
 def write_data_rki():
-    filename = 's3://coronanrw/corona_rki.csv'
+    filename = f's3://{os.environ["BUCKET_NAME"]}/corona_rki.csv'
     df = clear_data()
     write = df.to_csv(index=False)
     fs = s3fs.S3FileSystem()

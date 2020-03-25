@@ -4,12 +4,14 @@ provider:
   name: aws
   region: eu-central-1
   runtime: python3.8
-  stage: staging
+  stage: ${env:STAGE}
+  environment:
+    BUCKET_NAME: "coronanrw-${self:provider.stage}"
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:*
-      Resource: "coronanrw"
+      Resource: "arn:aws:s3:::coronanrw-${self:provider.stage}"
 
 functions:
   scrape:
@@ -20,7 +22,6 @@ functions:
           name: ${self:service}-${self:provider.stage}-scrape
           rate: rate(3 minutes)
           enabled: true
-
 
 plugins:
   - serverless-python-requirements
