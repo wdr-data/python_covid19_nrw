@@ -11,6 +11,11 @@
 - Make pull request (or ask for repo membership)
 - After review your new scraper will be deployed automatically
 
-
 ## To Dos
 - automate deploy
+
+## How to test locally
+-
+
+## Automated tests
+-

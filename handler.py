@@ -3,7 +3,7 @@ from get_data_mags_nrw import write_data_nrw
 from get_data_rki import write_data_rki
 
 
-def hello(event, context):
+def scrape(event, context):
     write_data_nrw()
     write_data_rki()
 
@@ -21,4 +21,4 @@ def hello(event, context):
 
 
 if __name__ == "__main__":
-    hello('', '')
+    scrape('', '')

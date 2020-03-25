@@ -3,10 +3,18 @@ service: corona-scraper-nrw
 provider:
   name: aws
   runtime: python3.8
+  stage: staging
 
 functions:
-  hello:
-    handler: handler.hello
+  scrape:
+    handler: handler.scrape
+    timeout: 120
+    events:
+      - schedule:
+          name: ${self:service}-${self:provider.stage}-scrape
+          rate: rate(3 minutes)
+          enabled: true
+
 
 plugins:
   - serverless-python-requirements
