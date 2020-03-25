@@ -48,3 +48,8 @@ def write_data_rki():
     fs.setxattr(filename,
                 copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
     fs.chmod(filename, 'public-read')
+
+
+if __name__ == '__main__':
+    df = get_data(url)
+    print(df.to_csv(index=False))

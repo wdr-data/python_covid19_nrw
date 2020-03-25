@@ -91,3 +91,8 @@ def write_data_nrw():
     fs.setxattr(filename,
                 copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
     fs.chmod(filename, 'public-read')
+
+
+if __name__ == '__main__':
+    df = clear_data()
+    print(df.to_csv(index=False))
