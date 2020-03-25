@@ -12,6 +12,9 @@ env:
 
 cache: yarn
 
+before_script:
+  - yarn
+
 skript: echo "no tests 😟"
 
 deploy:
