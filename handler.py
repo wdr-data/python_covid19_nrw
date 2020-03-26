@@ -1,10 +1,14 @@
 import json
 from get_data_mags_nrw import write_data_nrw
 from get_data_rki import write_data_rki
+import datetime
+
+now = datetime.datetime.now()
 
 
 def scrape(event, context):
     write_data_nrw()
+    print(f'Updated: {now}')
     write_data_rki()
 
     body = {
