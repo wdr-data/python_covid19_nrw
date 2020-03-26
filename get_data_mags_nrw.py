@@ -170,7 +170,7 @@ def clear_data():
     df = pd.merge(df, df_inhabitants)
     df.Einwohner = df.Einwohner.astype('int')
     df['Infizierte pro 100.000'] = (
-        df.Infizierte * 100000 / df.Einwohner).round(2)
+        df.Infizierte * 100000 / df.Einwohner).round(1)
 
     df['Stand'] = parse_date(url)
 
