@@ -12,6 +12,7 @@ class HTMLTableParser:
     def parse_url(self, url):
         response = requests.get(url)
         soup = bs(response.text, 'lxml')
+        date = soup.find('dc.date.modified')
         return [(table, self.parse_html_table(table))
                 for table in soup.find_all('table')]
 
@@ -59,6 +60,16 @@ class HTMLTableParser:
         return df
 
 
+def parse_date(url):
+    response = requests.get(url)
+    soup = bs(response.text, 'lxml')
+    date = soup.find('meta', attrs={'name': 'dc.date.modified'})
+    return date.get('content')
+
+
+print(parse_date(url))
+
+
 def get_data():
     hp = HTMLTableParser()
     table = hp.parse_url(url)[0][1]  # Grabbing the table from the tuple
@@ -69,16 +80,92 @@ def get_data():
 def clear_data():
     df = get_data()
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
+
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
     df = df.replace('Mülheim / Ruhr', 'Mülheim an der Ruhr')
     df = df.replace(regex=r' +\(Kreis\)', value='')
     df = df.replace(regex=r'\.', value='')
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
+
+    df.Infizierte = df.Infizierte.replace(u'\xa0', u' ')
+    df.Infizierte = df.Infizierte.replace(u' ', 0)
+    df.Infizierte = df.Infizierte.astype('int')
+
+    df.Todesfälle = df.Todesfälle.replace(u'\xa0', u' ')
+    df.Todesfälle = df.Todesfälle.replace(u' ', 0)
+    df.Todesfälle = df.Todesfälle.astype('int')
+
+    inhabitants = {
+        'Bielefeld': 333786,
+        'Bochum': 364628,
+        'Bonn': 327258,
+        'Borken': 370676,
+        'Bottrop': 117383,
+        'Coesfeld': 219929,
+        'Dortmund': 587010,
+        'Duisburg': 498590,
+        'Düren': 263722,
+        'Düsseldorf': 619294,
+        'Ennepe-Ruhr-Kreis': 324296,
+        'Essen': 583109,
+        'Euskirchen': 192840,
+        'Gelsenkirchen': 260654,
+        'Gütersloh': 364083,
+        'Hagen': 188814,
+        'Hamm': 179111,
+        'Heinsberg': 254322,
+        'Herford': 250783,
+        'Herne': 156374,
+        'Hochsauerlandkreis': 260475,
+        'Höxter': 140667,
+        'Kleve': 310974,
+        'Köln': 1085664,
+        'Krefeld': 227020,
+        'Leverkusen': 163838,
+        'Lippe': 348391,
+        'Märkischer Kreis': 412120,
+        'Mettmann': 485684,
+        'Minden-Lübbecke': 310710,
+        'Mönchengladbach': 261454,
+        'Mülheim an der Ruhr': 170880,
+        'Münster': 314319,
+        'Oberbergischer Kreis': 272471,
+        'Oberhausen': 210829,
+        'Olpe': 134775,
+        'Paderborn': 306890,
+        'Recklinghausen': 615261,
+        'Remscheid': 110994,
+        'Rhein-Erft-Kreis': 470089,
+        'Rhein-Kreis Neuss': 451007,
+        'Rhein-Sieg-Kreis': 599780,
+        'Rheinisch-Bergischer Kreis': 283455,
+        'Siegen-Wittgenstein': 278210,
+        'Soest': 301902,
+        'Solingen': 159360,
+        'Städteregion Aachen': 555465,
+        'Steinfurt': 447614,
+        'Unna': 394782,
+        'Viersen': 298935,
+        'Warendorf': 277783,
+        'Wesel': 459809,
+        'Wuppertal': 354382,
+        'Gesamt': 17932651,
+    }
+
+    df_inhabitants = pd.DataFrame(inhabitants.items(), columns=[
+                                  'Landkreis/ kreisfreie Stadt', 'Einwohner'])
+
+    df = pd.merge(df, df_inhabitants)
+    df.Einwohner = df.Einwohner.astype('int')
+    df['Infizierte pro 100.000'] = (
+        df.Infizierte * 100000 / df.Einwohner).round()
+
+    df['Stand'] = parse_date(url)
+    df.Stand = pd.to_datetime(df.Stand, errors='raise')
+    df.Stand = df.Stand.dt.strftime('%d.%m.%Y')
+
     return df
-
-
-# clear_data()
 
 
 def write_data_nrw():
