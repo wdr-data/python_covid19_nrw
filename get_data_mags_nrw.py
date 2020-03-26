@@ -65,9 +65,17 @@ def parse_date(url):
     response = requests.get(url)
     soup = bs(response.text, 'lxml')
 
-    date = soup.find('meta', attrs={'name': 'dc.date.modified'})
-    textDate = date.get('content')
-    return textDate
+    textBlock = soup(text=re.compile(r'Aktueller Stand: (.*)'))
+
+    for block in textBlock:
+        re_search = re.search('Aktueller Stand: (.*)(, .*)(\.)', block)
+        if re_search:
+            date = re_search.group(1)
+            dateText = date + re_search.group(2)
+        if not dateText:
+            meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
+            dateText = meta_date.get('content')
+    return dateText
 
 
 print(parse_date(url))
@@ -165,8 +173,6 @@ def clear_data():
         df.Infizierte * 100000 / df.Einwohner).round(2)
 
     df['Stand'] = parse_date(url)
-    df.Stand = pd.to_datetime(df.Stand, errors='raise')
-    df.Stand = df.Stand.dt.strftime('%d.%m.%Y')
 
     return df
 
