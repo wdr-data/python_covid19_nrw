@@ -72,6 +72,7 @@ def clear_data():
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
     df = df.replace('Mülheim / Ruhr', 'Mülheim an der Ruhr')
     df = df.replace(regex=r' +\(Kreis\)', value='')
+    df = df.replace(regex=r'\.', value='')
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
     return df
