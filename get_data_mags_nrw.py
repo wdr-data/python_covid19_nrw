@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup as bs
 import s3fs
+import re
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
 
@@ -63,8 +64,10 @@ class HTMLTableParser:
 def parse_date(url):
     response = requests.get(url)
     soup = bs(response.text, 'lxml')
+
     date = soup.find('meta', attrs={'name': 'dc.date.modified'})
-    return date.get('content')
+    textDate = date.get('content')
+    return textDate
 
 
 print(parse_date(url))
@@ -159,7 +162,7 @@ def clear_data():
     df = pd.merge(df, df_inhabitants)
     df.Einwohner = df.Einwohner.astype('int')
     df['Infizierte pro 100.000'] = (
-        df.Infizierte * 100000 / df.Einwohner).round()
+        df.Infizierte * 100000 / df.Einwohner).round(2)
 
     df['Stand'] = parse_date(url)
     df.Stand = pd.to_datetime(df.Stand, errors='raise')
