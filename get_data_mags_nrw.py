@@ -10,6 +10,7 @@ import dateparser
 import pytz
 
 from data.inhabitants import inhabitants
+from data.studios import studios
 from slackbot import send_slack_message
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
@@ -150,9 +151,10 @@ def write_data_nrw():
                 copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
     fs.chmod(filename, 'public-read')
 
-    return
     for studio, areas in studios.items():
+        df_studio = df[df['Landkreis/ kreisfreie Stadt'].isin(areas)]
         filename = f's3://{os.environ["BUCKET_NAME"]}/corona_mags_nrw_{studio}.csv'
+        write = df_studio.to_csv(index=False)
         with fs.open(filename, 'w') as f:
             f.write(write)
         fs.setxattr(filename,
