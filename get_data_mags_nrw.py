@@ -1,12 +1,16 @@
 import os
 import re
+from datetime import datetime, time
 
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup as bs
 import s3fs
+import dateparser
+import pytz
 
 from data.inhabitants import inhabitants
+from slackbot import send_slack_message
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
 
@@ -44,6 +48,8 @@ class HTMLTableParser:
         # Safeguard on Column Titles
         if len(column_names) > 0 and len(column_names) != n_columns:
             raise Exception("Column titles do not match the number of columns")
+        if len(column_names) > 3:
+            send_slack_message('Neue Spalte in Mags-Daten')
 
         columns = column_names if len(
             column_names) > 0 else range(0, n_columns)
@@ -71,9 +77,15 @@ def parse_date(response):
         re_search = re.search('Aktueller Stand: (.*)(, .*)(\.)', block)
         if re_search:
             date = re_search.group(1)
+            check_date = dateparser.parse(date, languages=['de'])
+            tz = pytz.timezone('Europe/Berlin')
+            now = datetime.now(tz)
+            alarm_time = time(10, 5)
+            if check_date.date() < now.date() and now.time() > alarm_time:
+                send_slack_message('Mags Daten-Aktualisierung verspätet')
             dateText = date + re_search.group(2)
         if not dateText:
-            # TODO send error to slackbot
+            send_slack_message('Datumsformat hat sich geändert')
             meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
             dateText = meta_date.get('content')
     return dateText
@@ -81,7 +93,7 @@ def parse_date(response):
 
 def get_data():
     response = requests.get(url)
-    assert bool(response), 'Page load failed'
+    assert bool(response), 'Laden der Mags-Seite fehlgeschlagen'
     hp = HTMLTableParser()
     # Grabbing the table from the tuple
     table = hp.parse_response(response)[0][1]
@@ -93,7 +105,7 @@ def clear_data():
     df, response = get_data()
 
     for column in ['Landkreis/ kreisfreie Stadt', 'Bestätigte Fälle', 'Todesfälle']:
-        assert column in df.columns, 'Header of table changed'
+        assert column in df.columns, 'Spaltenkopf in Mags-Daten geändert'
 
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
 
@@ -115,7 +127,7 @@ def clear_data():
     df_inhabitants = pd.DataFrame(inhabitants.items(), columns=[
                                   'Landkreis/ kreisfreie Stadt', 'Einwohner'])
     for area in df_inhabitants['Landkreis/ kreisfreie Stadt']:
-        assert area in df['Landkreis/ kreisfreie Stadt'].values, f'{area} not found'
+        assert area in df['Landkreis/ kreisfreie Stadt'].values, f'{area} in Mags-Daten nicht gefunden'
 
     df = pd.merge(df, df_inhabitants)
     df.Einwohner = df.Einwohner.astype('int')
@@ -137,6 +149,15 @@ def write_data_nrw():
     fs.setxattr(filename,
                 copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
     fs.chmod(filename, 'public-read')
+
+    return
+    for studio, areas in studios.items():
+        filename = f's3://{os.environ["BUCKET_NAME"]}/corona_mags_nrw_{studio}.csv'
+        with fs.open(filename, 'w') as f:
+            f.write(write)
+        fs.setxattr(filename,
+                    copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
+        fs.chmod(filename, 'public-read')
 
 
 if __name__ == '__main__':
