@@ -30,5 +30,15 @@ def scrape(event, context):
     return response
 
 
+def error(event, context):
+    foo = 'bar'
+    assert foo = 'foo'
+
+
+def notify(event, context):
+    import slackbot
+    slackbot.send_slack_message('Löppt')
+
+
 if __name__ == "__main__":
     scrape('', '')

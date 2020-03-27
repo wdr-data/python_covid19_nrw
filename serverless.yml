@@ -24,6 +24,10 @@ functions:
           name: ${self:service}-${self:provider.stage}-scrape
           rate: rate(3 minutes)
           enabled: true
+  error:
+    handler: handler.error
+  notify:
+    handler: handler.notify
 
 plugins:
   - serverless-python-requirements
