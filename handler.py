@@ -32,7 +32,7 @@ def scrape(event, context):
 
 def error(event, context):
     foo = 'bar'
-    assert foo = 'foo'
+    assert foo == 'foo'
 
 
 def notify(event, context):
