@@ -1,19 +1,24 @@
 import os
+import re
+from datetime import datetime, time
+
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup as bs
 import s3fs
-import re
+import dateparser
+import pytz
+
+from data.inhabitants import inhabitants
+from slackbot import send_slack_message
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
 
 
 class HTMLTableParser:
 
-    def parse_url(self, url):
-        response = requests.get(url)
+    def parse_response(self, response):
         soup = bs(response.text, 'lxml')
-        date = soup.find('dc.date.modified')
         return [(table, self.parse_html_table(table))
                 for table in soup.find_all('table')]
 
@@ -43,6 +48,8 @@ class HTMLTableParser:
         # Safeguard on Column Titles
         if len(column_names) > 0 and len(column_names) != n_columns:
             raise Exception("Column titles do not match the number of columns")
+        if len(column_names) > 3:
+            send_slack_message('Neue Spalte in Mags-Daten')
 
         columns = column_names if len(
             column_names) > 0 else range(0, n_columns)
@@ -61,8 +68,7 @@ class HTMLTableParser:
         return df
 
 
-def parse_date(url):
-    response = requests.get(url)
+def parse_date(response):
     soup = bs(response.text, 'lxml')
 
     textBlock = soup(text=re.compile(r'Aktueller Stand: (.*)'))
@@ -71,25 +77,36 @@ def parse_date(url):
         re_search = re.search('Aktueller Stand: (.*)(, .*)(\.)', block)
         if re_search:
             date = re_search.group(1)
+            check_date = dateparser.parse(date, languages=['de'])
+            tz = pytz.timezone('Europe/Berlin')
+            now = datetime.now(tz)
+            alarm_time = time(10, 5)
+            if check_date.date() < now.date() and now.time() > alarm_time:
+                send_slack_message('Mags Daten-Aktualisierung verspätet')
             dateText = date + re_search.group(2)
         if not dateText:
+            send_slack_message('Datumsformat hat sich geändert')
             meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
             dateText = meta_date.get('content')
     return dateText
 
 
-print(parse_date(url))
-
-
 def get_data():
+    response = requests.get(url)
+    assert bool(response), 'Laden der Mags-Seite fehlgeschlagen'
     hp = HTMLTableParser()
-    table = hp.parse_url(url)[0][1]  # Grabbing the table from the tuple
+    # Grabbing the table from the tuple
+    table = hp.parse_response(response)[0][1]
     df = pd.DataFrame(table)
-    return df
+    return df, response
 
 
 def clear_data():
-    df = get_data()
+    df, response = get_data()
+
+    for column in ['Landkreis/ kreisfreie Stadt', 'Bestätigte Fälle', 'Todesfälle']:
+        assert column in df.columns, 'Spaltenkopf in Mags-Daten geändert'
+
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
 
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
@@ -107,72 +124,17 @@ def clear_data():
     df.Todesfälle = df.Todesfälle.replace(u' ', 0)
     df.Todesfälle = df.Todesfälle.astype('int')
 
-    inhabitants = {
-        'Bielefeld': 333786,
-        'Bochum': 364628,
-        'Bonn': 327258,
-        'Borken': 370676,
-        'Bottrop': 117383,
-        'Coesfeld': 219929,
-        'Dortmund': 587010,
-        'Duisburg': 498590,
-        'Düren': 263722,
-        'Düsseldorf': 619294,
-        'Ennepe-Ruhr-Kreis': 324296,
-        'Essen': 583109,
-        'Euskirchen': 192840,
-        'Gelsenkirchen': 260654,
-        'Gütersloh': 364083,
-        'Hagen': 188814,
-        'Hamm': 179111,
-        'Heinsberg': 254322,
-        'Herford': 250783,
-        'Herne': 156374,
-        'Hochsauerlandkreis': 260475,
-        'Höxter': 140667,
-        'Kleve': 310974,
-        'Köln': 1085664,
-        'Krefeld': 227020,
-        'Leverkusen': 163838,
-        'Lippe': 348391,
-        'Märkischer Kreis': 412120,
-        'Mettmann': 485684,
-        'Minden-Lübbecke': 310710,
-        'Mönchengladbach': 261454,
-        'Mülheim an der Ruhr': 170880,
-        'Münster': 314319,
-        'Oberbergischer Kreis': 272471,
-        'Oberhausen': 210829,
-        'Olpe': 134775,
-        'Paderborn': 306890,
-        'Recklinghausen': 615261,
-        'Remscheid': 110994,
-        'Rhein-Erft-Kreis': 470089,
-        'Rhein-Kreis Neuss': 451007,
-        'Rhein-Sieg-Kreis': 599780,
-        'Rheinisch-Bergischer Kreis': 283455,
-        'Siegen-Wittgenstein': 278210,
-        'Soest': 301902,
-        'Solingen': 159360,
-        'Städteregion Aachen': 555465,
-        'Steinfurt': 447614,
-        'Unna': 394782,
-        'Viersen': 298935,
-        'Warendorf': 277783,
-        'Wesel': 459809,
-        'Wuppertal': 354382,
-        'Gesamt': 17932651,
-    }
-
     df_inhabitants = pd.DataFrame(inhabitants.items(), columns=[
                                   'Landkreis/ kreisfreie Stadt', 'Einwohner'])
+    for area in df_inhabitants['Landkreis/ kreisfreie Stadt']:
+        assert area in df['Landkreis/ kreisfreie Stadt'].values, f'{area} in Mags-Daten nicht gefunden'
 
     df = pd.merge(df, df_inhabitants)
     df.Einwohner = df.Einwohner.astype('int')
     df['Infizierte pro 100.000'] = (
         df.Infizierte * 100000 / df.Einwohner).round(1)
 
-    df['Stand'] = parse_date(url)
+    df['Stand'] = parse_date(response)
 
     return df
 
@@ -188,7 +150,17 @@ def write_data_nrw():
                 copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
     fs.chmod(filename, 'public-read')
 
+    return
+    for studio, areas in studios.items():
+        filename = f's3://{os.environ["BUCKET_NAME"]}/corona_mags_nrw_{studio}.csv'
+        with fs.open(filename, 'w') as f:
+            f.write(write)
+        fs.setxattr(filename,
+                    copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
+        fs.chmod(filename, 'public-read')
+
 
 if __name__ == '__main__':
     df = clear_data()
+    # print(df)
     print(df.to_csv(index=False))

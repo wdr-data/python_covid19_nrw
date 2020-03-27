@@ -7,6 +7,8 @@ provider:
   stage: ${env:STAGE}
   environment:
     BUCKET_NAME: "coronanrw-${self:provider.stage}"
+    SENTRY_URI: ${env:SENTRY_URI}
+    SLACK_WEBHOOK: ${env:SLACK_WEBHOOK, ''}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -22,6 +24,10 @@ functions:
           name: ${self:service}-${self:provider.stage}-scrape
           rate: rate(3 minutes)
           enabled: true
+  error:
+    handler: handler.error
+  notify:
+    handler: handler.notify
 
 plugins:
   - serverless-python-requirements
