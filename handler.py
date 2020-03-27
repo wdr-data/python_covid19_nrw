@@ -1,13 +1,19 @@
 import json
-from get_data_mags_nrw import write_data_nrw
-from get_data_rki import write_data_rki
 import datetime
 
-now = datetime.datetime.now()
+import sentry_sdk
+from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
+
+from get_data_rki import write_data_rki
+from get_data_mags_nrw import write_data_nrw
+
+sentry_sdk.init(os.environ['SENTRY_URI'],
+                integrations=[AwsLambdaIntegration()])
 
 
 def scrape(event, context):
     write_data_nrw()
+    now = datetime.datetime.now()
     print(f'Updated: {now}')
     write_data_rki()
 
