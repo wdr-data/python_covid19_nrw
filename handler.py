@@ -1,5 +1,6 @@
 import json
 import datetime
+import os
 
 import sentry_sdk
 from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
