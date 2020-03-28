@@ -9,8 +9,8 @@ import pytz
 
 from data.inhabitants import inhabitants
 from data.studios import studios
-from slackbot import send_slack_message
-from storage import upload_dataframe
+from utils.slackbot import send_slack_message
+from utils.storage import upload_dataframe
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
 

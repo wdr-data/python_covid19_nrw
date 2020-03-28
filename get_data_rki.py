@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from storage import upload_dataframe
+from utils.storage import upload_dataframe
 
 url = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID&resultOffset=0&resultRecordCount=1000&cacheHint=true'
 
