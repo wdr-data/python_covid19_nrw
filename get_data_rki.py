@@ -1,16 +1,16 @@
 # Script by Claus Hesseling, NDR https://github.com/chesselingfm/corona_rki/blob/master/rki_regional-ard.ipynb
 
-import os
-import pandas as pd
-import json
-import requests
-from io import StringIO
-# package for flattening json in pandas df
-import re
-import numpy as np
 import datetime
+from io import StringIO
+import json
+import re
 import time
-import s3fs
+
+import numpy as np
+import pandas as pd
+import requests
+
+from utils.storage import upload_dataframe
 
 url = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?f=json&where=1%3D1&returnGeometry=false&spatialRel=esriSpatialRelIntersects&outFields=*&orderByFields=OBJECTID&resultOffset=0&resultRecordCount=1000&cacheHint=true'
 
@@ -38,16 +38,10 @@ def get_data(url):
 
 
 def write_data_rki():
-    filename = f's3://{os.environ["BUCKET_NAME"]}/corona_rki.csv'
+    filename = 'corona_rki.csv'
     df = get_data(url)
     print(df)
-    write = df.to_csv(index=False)
-    fs = s3fs.S3FileSystem()
-    with fs.open(filename, 'w') as f:
-        f.write(write)
-    fs.setxattr(filename,
-                copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
-    fs.chmod(filename, 'public-read')
+    upload_dataframe(df, filename)
 
 
 if __name__ == '__main__':

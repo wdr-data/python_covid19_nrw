@@ -1,11 +1,19 @@
 # Automated workflow for data scraping
 
 ## Process
-- Get data from url
-- clean data in pandas dataframe
-- write dataframe to .csv
-- store .csv in s3-bucket as text-file
-- deploy scraper to aws lambda and run it there every 3 minutes
+- Get data from URL
+- Clean data in Pandas dataframe
+- Convert dataframe to .csv
+- Store .csv in S3 bucket as text file
+- Deploy scraper to AWS lambda and run it there every 3 minutes
+
+## Creating a new scraper
+- Create a copy of the `scraper_template.py` file or one of the existing scrapers
+- Implement your scraper
+- Add your scraper to the list of scrapers in `handler.py`
+
+## How to test locally
+- Run your scraper .py skript: `python get_data_scrapername.py`
 
 ## Deploy
 - Push your code to the repo, it will get deployed automatically
@@ -14,10 +22,7 @@
 - Make pull request (or ask for repo membership)
 - After review your new scraper will be deployed automatically
 
-## How to test locally
-- Run your scraper .py skript: `python get_data_scrapername.py`
-
-## Automated tests
-Lambda that checks other lambdas
-- Does .csv contain expected content (table headers i.e) - if changes detected ...
-- check for last update ... if tis is older than 6 minutes ... sentry-error to slack
+## Error reporting
+- Any errors in a scraper are reported to Sentry
+- Use asserts to confirm the data is valid
+- If non-critical but interesting changes to the data are noticed, report them to Slack via webhook
