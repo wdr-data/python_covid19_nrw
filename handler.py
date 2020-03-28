@@ -22,9 +22,17 @@ SCRAPERS = [
 
 def scrape(event, context):
     for scraper in SCRAPERS:
-        scraper()
-        now = datetime.datetime.now()
-        print(f'Updated {scraper.__name__} at {now}')
+        scraper_name = scraper.__name__
+
+        try:
+            scraper()
+            now = datetime.datetime.now()
+            print(f'Updated {scraper_name} at {now}')
+        except Exception as e:
+            # Catch and send error to Sentry manually so we can continue
+            # running other scrapers if one fails
+            print(f'Scraper {scraper_name} failed with {e}')
+            sentry_sdk.capture_exception(e)
 
     body = {
         "message": f"Ran {len(SCRAPERS)} scrapers successfully.",
