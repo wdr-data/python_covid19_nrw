@@ -5,13 +5,13 @@ from datetime import datetime, time
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup as bs
-import s3fs
 import dateparser
 import pytz
 
 from data.inhabitants import inhabitants
 from data.studios import studios
 from slackbot import send_slack_message
+from storage import upload_dataframe
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
 
@@ -141,25 +141,15 @@ def clear_data():
 
 
 def write_data_nrw():
-    filename = f's3://{os.environ["BUCKET_NAME"]}/corona_mags_nrw.csv'
+    filename = 'corona_mags_nrw.csv'
     df = clear_data()
-    write = df.to_csv(index=False)
-    fs = s3fs.S3FileSystem()
-    with fs.open(filename, 'w') as f:
-        f.write(write)
-    fs.setxattr(filename,
-                copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
-    fs.chmod(filename, 'public-read')
+
+    upload_dataframe(df, filename)
 
     for studio, areas in studios.items():
         df_studio = df[df['Landkreis/ kreisfreie Stadt'].isin(areas)]
-        filename = f's3://{os.environ["BUCKET_NAME"]}/corona_mags_nrw_{studio}.csv'
-        write = df_studio.to_csv(index=False)
-        with fs.open(filename, 'w') as f:
-            f.write(write)
-        fs.setxattr(filename,
-                    copy_kwargs={"ContentType": "text/plain; charset=utf-8"})
-        fs.chmod(filename, 'public-read')
+        filename = f'corona_mags_nrw_{studio}.csv'
+        upload_dataframe(df_studio, filename)
 
 
 if __name__ == '__main__':
