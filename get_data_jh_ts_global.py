@@ -29,7 +29,7 @@ def get_data():
 
     df.columns = new_names
 
-    df = df.to_csv(index=True)
+    df = df.reset_index()
 
     return df
 
