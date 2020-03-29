@@ -29,19 +29,19 @@ def get_data():
 
     df.columns = new_names
 
+    df = df.to_csv(index=True)
+
     return df
 
 
 def write_data_jh_ts_global():
     df = get_data()
-    df = df.to_csv(index=True)
     filename = 'time_series_covid19_confirmed_global.csv'
-
     upload_dataframe(df, filename)
 
 
 # If the file is executed directly, print cleaned data
 if __name__ == '__main__':
     df = get_data()
-    # print(df.head(10))
-    print(df.to_csv(index=True))
+    print(df)
+    # print(df.to_csv(index=True))
