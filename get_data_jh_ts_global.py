@@ -34,6 +34,7 @@ def get_data():
 
 def write_data_jh_ts_global():
     df = get_data()
+    df = df.to_csv(index=True)
     filename = 'time_series_covid19_confirmed_global.csv'
 
     upload_dataframe(df, filename)
