@@ -12,12 +12,14 @@ sentry_sdk.init(os.environ['SENTRY_URI'],
 from get_data_rki import write_data_rki
 from get_data_mags_nrw import write_data_nrw
 from get_data_jh_ts_global import write_data_jh_ts_global
+from get_data_jh_global import write_data_jh_global
 
 # Add your scraper here ⬇️, without () at the end
 SCRAPERS = [
     write_data_nrw,
     write_data_rki,
-    write_data_jh_ts_global
+    write_data_jh_ts_global,
+    write_data_jh_global
 ]
 
 
