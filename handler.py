@@ -19,6 +19,7 @@ SCRAPERS = [
     write_data_nrw,
     write_data_rki,
     write_data_jh_ts_global,
+    write_data_jh_ts_filtered,
     write_data_jh_global
 ]
 

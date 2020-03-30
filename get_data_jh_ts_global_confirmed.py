@@ -38,10 +38,21 @@ def write_data_jh_ts_global():
     df = get_data()
     filename = 'time_series_covid19_confirmed_global.csv'
     upload_dataframe(df, filename)
+    return df
+
+
+def write_data_jh_ts_filtered():
+    df = get_data()
+    countries = ['Germany', 'Italy', 'China', 'US']
+    df = df[df['Country/Region'].isin(countries)]
+    df = df.drop(columns=["Lat", "Long"])
+    filename = 'time_series_covid19_confirmed_filtered_countries.csv'
+    upload_dataframe(df, filename)
+    return df
 
 
 # If the file is executed directly, print cleaned data
 if __name__ == '__main__':
     df = get_data()
-    print(df)
-    # print(df.to_csv(index=True))
+    # print(df)
+    print(df.to_csv(index=True))
