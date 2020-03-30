@@ -6,10 +6,10 @@ import pandas as pd
 from bs4 import BeautifulSoup as bs
 import dateparser
 import pytz
+import sentry_sdk
 
 from data.inhabitants import inhabitants
 from data.studios import studios
-from utils.slackbot import send_slack_message
 from utils.storage import upload_dataframe
 
 url = 'https://example.com/'

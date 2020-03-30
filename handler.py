@@ -54,10 +54,5 @@ def error(event, context):
     assert foo == 'foo'
 
 
-def notify(event, context):
-    import slackbot
-    slackbot.send_slack_message('Löppt')
-
-
 if __name__ == "__main__":
     scrape('', '')

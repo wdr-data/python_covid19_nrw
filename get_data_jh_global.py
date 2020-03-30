@@ -8,8 +8,8 @@ import pandas as pd
 from bs4 import BeautifulSoup as bs
 import dateparser
 import pytz
+import sentry_sdk
 
-from utils.slackbot import send_slack_message
 from utils.storage import upload_dataframe
 
 url = 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports'
