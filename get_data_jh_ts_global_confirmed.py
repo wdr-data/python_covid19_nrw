@@ -43,7 +43,7 @@ def write_data_jh_ts_global():
 
 def write_data_jh_ts_filtered():
     df = get_data()
-    countries = ['Germany', 'Italy', 'China', 'US']
+    countries = ['Germany', 'Italy', 'Spain', 'China', 'US']
     df = df[df['Country/Region'].isin(countries)]
     df = df.drop(columns=["Lat", "Long"])
     filename = 'time_series_covid19_confirmed_filtered_countries.csv'
