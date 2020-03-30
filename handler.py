@@ -11,12 +11,16 @@ sentry_sdk.init(os.environ['SENTRY_URI'],
 # Import your scraper here ⬇️
 from get_data_rki import write_data_rki
 from get_data_mags_nrw import write_data_nrw
-
+from get_data_jh_ts_global_confirmed import write_data_jh_ts_global, write_data_jh_ts_filtered
+from get_data_jh_global import write_data_jh_global
 
 # Add your scraper here ⬇️, without () at the end
 SCRAPERS = [
     write_data_nrw,
     write_data_rki,
+    write_data_jh_ts_global,
+    write_data_jh_ts_filtered,
+    write_data_jh_global
 ]
 
 
@@ -49,11 +53,6 @@ def scrape(event, context):
 def error(event, context):
     foo = 'bar'
     assert foo == 'foo'
-
-
-def notify(event, context):
-    import slackbot
-    slackbot.send_slack_message('Löppt')
 
 
 if __name__ == "__main__":

@@ -6,10 +6,10 @@ import pandas as pd
 from bs4 import BeautifulSoup as bs
 import dateparser
 import pytz
+import sentry_sdk
 
 from data.inhabitants import inhabitants
 from data.studios import studios
-from utils.slackbot import send_slack_message
 from utils.storage import upload_dataframe
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
@@ -49,7 +49,7 @@ class HTMLTableParser:
         if len(column_names) > 0 and len(column_names) != n_columns:
             raise Exception("Column titles do not match the number of columns")
         if len(column_names) > 3:
-            send_slack_message('Neue Spalte in Mags-Daten')
+            sentry_sdk.capture_message('Neue Spalte in Mags-Daten')
 
         columns = column_names if len(
             column_names) > 0 else range(0, n_columns)
@@ -80,12 +80,12 @@ def parse_date(response):
             check_date = dateparser.parse(date, languages=['de'])
             tz = pytz.timezone('Europe/Berlin')
             now = datetime.now(tz)
-            alarm_time = time(10, 5)
+            alarm_time = time(10, 30)
             if check_date.date() < now.date() and now.time() > alarm_time:
-                send_slack_message('Mags Daten-Aktualisierung verspätet')
+                sentry_sdk.capture_message('Mags Daten-Aktualisierung verspätet')
             dateText = date + re_search.group(2)
         if not dateText:
-            send_slack_message('Datumsformat hat sich geändert')
+            sentry_sdk.capture_message('Datumsformat hat sich geändert')
             meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
             dateText = meta_date.get('content')
     return dateText
