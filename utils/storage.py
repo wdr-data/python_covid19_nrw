@@ -15,6 +15,7 @@ def upload_dataframe(df, filename, change_notifcation=None):
     # Read old file-like object to check for differences
     bio_old = BytesIO()
     s3.download_fileobj(bucket, filename, bio_old)
+    bio_old.seek(0)
 
     if bio_old.read() != write:
         # Notify
