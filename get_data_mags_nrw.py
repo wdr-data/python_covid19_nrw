@@ -74,16 +74,10 @@ def parse_date(response):
     textBlock = soup(text=re.compile(r'Aktueller Stand: (.*)'))
 
     for block in textBlock:
-        re_search = re.search('Aktueller Stand: (.*)(, .*)(\.)', block)
+        re_search = re.search('Aktueller Stand: (.*)(\.)', block)
         if re_search:
-            date = re_search.group(1)
-            check_date = dateparser.parse(date, languages=['de'])
-            tz = pytz.timezone('Europe/Berlin')
-            now = datetime.now(tz)
-            alarm_time = time(10, 30)
-            if check_date.date() < now.date() and now.time() > alarm_time:
-                sentry_sdk.capture_message('Mags Daten-Aktualisierung verspätet')
-            dateText = date + re_search.group(2)
+            dateText = re_search.group(1)
+            dateText = dateText.replace('  ', ' ')
         if not dateText:
             sentry_sdk.capture_message('Datumsformat hat sich geändert')
             meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
@@ -143,7 +137,8 @@ def write_data_nrw():
     filename = 'corona_mags_nrw.csv'
     df = clear_data()
 
-    upload_dataframe(df, filename)
+    upload_dataframe(
+        df, filename, change_notifcation=f'Mags-Daten aktualisiert')
 
     for studio, areas in studios.items():
         df_studio = df[df['Landkreis/ kreisfreie Stadt'].isin(areas)]
