@@ -77,6 +77,7 @@ def parse_date(response):
         re_search = re.search('Aktueller Stand: (.*)(\.)', block)
         if re_search:
             dateText = re_search.group(1)
+            dateText = dateText.replace('  ', ' ')
         if not dateText:
             sentry_sdk.capture_message('Datumsformat hat sich geändert')
             meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
