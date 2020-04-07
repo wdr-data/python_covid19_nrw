@@ -116,6 +116,7 @@ def clear_data():
 
     df.Todesfälle = df.Todesfälle.replace(u'\xa0', u' ')
     df.Todesfälle = df.Todesfälle.replace(u' ', 0)
+    df.Todesfälle = df.Todesfälle.replace(u'-', 0)
     df.Todesfälle = df.Todesfälle.astype('int')
 
     df_inhabitants = pd.DataFrame(inhabitants.items(), columns=[
