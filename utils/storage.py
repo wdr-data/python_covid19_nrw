@@ -1,6 +1,7 @@
 import os
 from io import BytesIO
 
+from botocore.exceptions import ClientError
 from boto3 import client
 import sentry_sdk
 
@@ -14,12 +15,18 @@ def upload_dataframe(df, filename, change_notifcation=None):
 
     # Read old file-like object to check for differences
     bio_old = BytesIO()
-    s3.download_fileobj(bucket, filename, bio_old)
+    compare_failed = False
+
+    try:
+        s3.download_fileobj(bucket, filename, bio_old)
+    except ClientError:
+        compare_failed = True
+
     bio_old.seek(0)
 
     if bio_old.read() != write:
         # Notify
-        if change_notifcation:
+        if change_notifcation and not compare_failed:
             sentry_sdk.capture_message(change_notifcation)
 
         # Create new file-like object for upload
