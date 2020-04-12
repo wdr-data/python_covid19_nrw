@@ -108,7 +108,6 @@ def clear_data():
     df = df.replace(regex=r' +\(Kreis\)', value='')
     df = df.replace(regex=r'\.', value='')
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
-    df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     df.Infizierte = df.Infizierte.replace(u'\xa0', u' ')
     df.Infizierte = df.Infizierte.replace(u' ', 0)
@@ -133,10 +132,20 @@ def clear_data():
 
     return df
 
+def clear_data_nrw_gesamt():
+    df1 = clear_data()
+    df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
+    return df1
 
 def write_data_nrw():
+    filename = 'corona_mags_nrw_gesamt.csv'
+    df1 = clear_data_nrw_gesamt()
+    upload_dataframe(df1, filename1)
+
     filename = 'corona_mags_nrw.csv'
     df = clear_data()
+    # Remove 'Gesamt' from DF
+    df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     upload_dataframe(
         df, filename, change_notifcation=f'Mags-Daten aktualisiert')
@@ -148,6 +157,11 @@ def write_data_nrw():
 
 
 if __name__ == '__main__':
-    df = clear_data()
+    # df = clear_data()
+    # df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
+
+    df1 = clear_data()
+    df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
+
     # print(df)
-    print(df.to_csv(index=False))
+    print(df1.to_csv(index=False))
