@@ -138,7 +138,7 @@ def clear_data_nrw_gesamt():
     return df1
 
 def write_data_nrw():
-    filename = 'corona_mags_nrw_gesamt.csv'
+    filename1 = 'corona_mags_nrw_gesamt.csv'
     df1 = clear_data_nrw_gesamt()
     upload_dataframe(df1, filename1)
 
