@@ -1,4 +1,5 @@
 inhabitants = {
+    'Gesamt': 17932651,
     'Bielefeld': 333786,
     'Bochum': 364628,
     'Bonn': 327258,

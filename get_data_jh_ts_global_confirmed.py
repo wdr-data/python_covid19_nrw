@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, time
+from functools import lru_cache
 
 import requests
 import pandas as pd
@@ -13,6 +14,7 @@ from utils.storage import upload_dataframe
 url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
 
 
+@lru_cache()
 def get_data():
     # Download website
     df = pd.read_csv(url, parse_dates=True)

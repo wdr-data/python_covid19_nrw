@@ -48,7 +48,7 @@ class HTMLTableParser:
         # Safeguard on Column Titles
         if len(column_names) > 0 and len(column_names) != n_columns:
             raise Exception("Column titles do not match the number of columns")
-        if len(column_names) > 4:
+        if len(column_names) > 5:
             sentry_sdk.capture_message('Neue Spalte in Mags-Daten')
 
         columns = column_names if len(
@@ -98,17 +98,24 @@ def get_data():
 def clear_data():
     df, response = get_data()
 
-    for column in ['Landkreis/ kreisfreie Stadt', 'Bestätigte Fälle', 'Todesfälle']:
+    expected_columns = [
+        'Landkreis/ kreisfreie Stadt',
+        'Bestätigte Fälle',
+        'Bestätigte Fälle (RKI)',
+        'Todesfälle',
+        'Genesene*',
+    ]
+    for column in expected_columns:
         assert column in df.columns, 'Spaltenkopf in Mags-Daten geändert'
 
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
+    df = df.rename(columns={"Bestätigte Fälle (RKI)": "Infizierte (RKI)"})
 
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
     df = df.replace('Mülheim / Ruhr', 'Mülheim an der Ruhr')
     df = df.replace(regex=r' +\(Kreis\)', value='')
     df = df.replace(regex=r'\.', value='')
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
-    df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     df.Infizierte = df.Infizierte.replace(u'\xa0', u' ')
     df.Infizierte = df.Infizierte.replace(u' ', 0)
@@ -133,10 +140,20 @@ def clear_data():
 
     return df
 
+def clear_data_nrw_gesamt():
+    df1 = clear_data()
+    df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
+    return df1
 
 def write_data_nrw():
+    filename1 = 'corona_mags_nrw_gesamt.csv'
+    df1 = clear_data_nrw_gesamt()
+    upload_dataframe(df1, filename1)
+
     filename = 'corona_mags_nrw.csv'
     df = clear_data()
+    # Remove 'Gesamt' from DF
+    df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     upload_dataframe(
         df, filename, change_notifcation=f'Mags-Daten aktualisiert')
@@ -148,6 +165,11 @@ def write_data_nrw():
 
 
 if __name__ == '__main__':
-    df = clear_data()
+    # df = clear_data()
+    # df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
+
+    df1 = clear_data()
+    df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
+
     # print(df)
-    print(df.to_csv(index=False))
+    print(df1.to_csv(index=False))
