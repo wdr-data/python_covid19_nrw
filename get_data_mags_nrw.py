@@ -98,7 +98,14 @@ def get_data():
 def clear_data():
     df, response = get_data()
 
-    for column in ['Landkreis/ kreisfreie Stadt', 'Bestätigte Fälle', 'Todesfälle']:
+    expected_columns = [
+        'Landkreis/ kreisfreie Stadt',
+        'Bestätigte Fälle',
+        'Bestätigte Fälle (RKI)',
+        'Todesfälle',
+        'Genesene*',
+    ]
+    for column in expected_columns:
         assert column in df.columns, 'Spaltenkopf in Mags-Daten geändert'
 
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
