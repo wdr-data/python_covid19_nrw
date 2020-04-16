@@ -48,8 +48,6 @@ class HTMLTableParser:
         # Safeguard on Column Titles
         if len(column_names) > 0 and len(column_names) != n_columns:
             raise Exception("Column titles do not match the number of columns")
-        if len(column_names) > 5:
-            sentry_sdk.capture_message('Neue Spalte in Mags-Daten')
 
         columns = column_names if len(
             column_names) > 0 else range(0, n_columns)
@@ -106,8 +104,12 @@ def clear_data():
         'Todesfälle (IfSG)',
         'Genesene*',
     ]
+
     for column in expected_columns:
         assert column in df.columns, 'Spaltenkopf in Mags-Daten geändert'
+
+    if len(df.columns) > len(expected_columns):
+        sentry_sdk.capture_message('Neue Spalte in Mags-Daten')
 
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
     df = df.rename(columns={"Bestätigte Fälle (IfSG)": "Infizierte (RKI)"})
