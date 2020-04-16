@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, time
+from functools import lru_cache
 
 import requests
 import pandas as pd
@@ -14,6 +15,8 @@ from utils.storage import upload_dataframe
 
 url = 'https://example.com/'
 
+
+@lru_cache
 def get_data():
     # Download website
     response = requests.get(url)
