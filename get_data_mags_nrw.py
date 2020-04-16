@@ -103,6 +103,7 @@ def clear_data():
         'Bestätigte Fälle',
         'Bestätigte Fälle (IfSG)',
         'Todesfälle',
+        'Todesfälle (IfSG)',
         'Genesene*',
     ]
     for column in expected_columns:
@@ -110,6 +111,7 @@ def clear_data():
 
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
     df = df.rename(columns={"Bestätigte Fälle (IfSG)": "Infizierte (RKI)"})
+    df = df.rename(columns={"Todesfälle (IfSG)": "Todesfälle (RKI)"})
 
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
     df = df.replace('Mülheim / Ruhr', 'Mülheim an der Ruhr')
