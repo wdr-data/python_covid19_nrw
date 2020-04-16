@@ -101,7 +101,7 @@ def clear_data():
     expected_columns = [
         'Landkreis/ kreisfreie Stadt',
         'Bestätigte Fälle',
-        'Bestätigte Fälle (RKI)',
+        'Bestätigte Fälle (IfSG)',
         'Todesfälle',
         'Genesene*',
     ]
@@ -109,7 +109,7 @@ def clear_data():
         assert column in df.columns, 'Spaltenkopf in Mags-Daten geändert'
 
     df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
-    df = df.rename(columns={"Bestätigte Fälle (RKI)": "Infizierte (RKI)"})
+    df = df.rename(columns={"Bestätigte Fälle (IfSG)": "Infizierte (RKI)"})
 
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
     df = df.replace('Mülheim / Ruhr', 'Mülheim an der Ruhr')
