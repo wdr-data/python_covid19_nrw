@@ -98,9 +98,7 @@ def clear_data():
 
     expected_columns = [
         'Landkreis/ kreisfreie Stadt',
-        'Bestätigte Fälle',
         'Bestätigte Fälle (IfSG)',
-        'Todesfälle',
         'Todesfälle (IfSG)',
         'Genesene*',
     ]
@@ -111,9 +109,11 @@ def clear_data():
     if len(df.columns) > len(expected_columns):
         sentry_sdk.capture_message('Neue Spalte in Mags-Daten')
 
-    df = df.rename(columns={"Bestätigte Fälle": "Infizierte"})
-    df = df.rename(columns={"Bestätigte Fälle (IfSG)": "Infizierte (RKI)"})
-    df = df.rename(columns={"Todesfälle (IfSG)": "Todesfälle (RKI)"})
+    df["Infizierte (RKI)"] = df["Bestätigte Fälle (IfSG)"]
+    df = df.rename(columns={"Bestätigte Fälle (IfSG)": "Infizierte"})
+
+    df["Todesfälle (RKI)"] = df["Todesfälle (IfSG)"]
+    df = df.rename(columns={"Todesfälle (IfSG)": "Todesfälle"})
 
     df = df.replace('Aachen & Städteregion Aachen', 'Städteregion Aachen')
     df = df.replace('Mülheim / Ruhr', 'Mülheim an der Ruhr')
