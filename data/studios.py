@@ -19,7 +19,6 @@ studios = {
         "Coesfeld",
         "Steinfurt",
         "Warendorf",
-        "Recklinghausen",
     ],
     "essen": [
         "Bochum",
