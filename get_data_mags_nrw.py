@@ -130,6 +130,8 @@ def clear_data():
     df.Todesfälle = df.Todesfälle.replace(u'-', 0)
     df.Todesfälle = df.Todesfälle.astype('int')
 
+    df['Genesene*'] = df['Genesene*'].replace('-', 'k.A.')
+
     df_inhabitants = pd.DataFrame(inhabitants.items(), columns=[
                                   'Landkreis/ kreisfreie Stadt', 'Einwohner'])
     for area in df_inhabitants['Landkreis/ kreisfreie Stadt']:
@@ -144,10 +146,12 @@ def clear_data():
 
     return df
 
+
 def clear_data_nrw_gesamt():
     df1 = clear_data()
     df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
     return df1
+
 
 def write_data_nrw():
     filename1 = 'corona_mags_nrw_gesamt.csv'
