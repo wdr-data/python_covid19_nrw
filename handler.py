@@ -51,10 +51,5 @@ def scrape(event, context):
     return response
 
 
-def error(event, context):
-    foo = 'bar'
-    assert foo == 'foo'
-
-
 if __name__ == "__main__":
     scrape('', '')
