@@ -66,6 +66,8 @@ def clear_data():
     df['population'] = df['population'].astype('int')
     df['NeueFaelleLetzte7Tage'] = df['NeueFaelleLetzte7Tage'].astype('int')
 
+    df = df.rename(columns={"IdLandkreis": "ID"})
+
     return df
 
 
