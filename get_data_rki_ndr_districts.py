@@ -69,7 +69,7 @@ def clear_data():
     return df
 
 
-def write_data_example():
+def write_data_rki_ndr_districts():
     df = clear_data()
     filename = 'rki_ndr_districts.csv'
 
