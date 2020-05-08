@@ -13,6 +13,7 @@ from get_data_jh_global import write_data_jh_global
 from get_data_jh_ts_global_confirmed import write_data_jh_ts_global, write_data_jh_ts_filtered
 from get_data_mags_nrw import write_data_nrw
 from get_data_rki import write_data_rki
+from get_data_rki_ndr_districts import write_data_rki_ndr_districts
 
 # Add your scraper here ⬇️, without () at the end
 SCRAPERS = [
@@ -20,7 +21,8 @@ SCRAPERS = [
     write_data_rki,
     write_data_jh_ts_global,
     write_data_jh_ts_filtered,
-    write_data_jh_global
+    write_data_jh_global,
+    write_data_rki_ndr_districts,
 ]
 
 
@@ -37,6 +39,7 @@ def scrape(event, context):
                 # Catch and send error to Sentry manually so we can continue
                 # running other scrapers if one fails
                 print(f'Scraper {scraper_name} failed with {e}')
+                print(e)
                 sentry_sdk.capture_exception(e)
 
     body = {
