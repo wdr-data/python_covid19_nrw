@@ -46,7 +46,7 @@ def upload_dataframe(df, filename, change_notifcation=None):
         )
 
         # Upload file again into timestamped folder
-        bio_new.seek(0)
+        bio_new = BytesIO(write)
         now = datetime.now(tz=pytz.timezone('Europe/Berlin'))
         timestamp = now.date().isoformat()
         s3.upload_fileobj(
