@@ -1,5 +1,7 @@
 import os
 from io import BytesIO
+from datetime import datetime
+import pytz
 
 from botocore.exceptions import ClientError
 from boto3 import client
@@ -33,10 +35,24 @@ def upload_dataframe(df, filename, change_notifcation=None):
         bio_new = BytesIO(write)
 
         # Upload file with ACL and content type
-        return s3.upload_fileobj(
+        s3.upload_fileobj(
             bio_new,
             bucket,
             filename,
+            ExtraArgs={
+                'ACL': 'public-read',
+                'ContentType': 'text/plain; charset=utf-8',
+            },
+        )
+
+        # Upload file again into timestamped folder
+        bio_new.seek(0)
+        now = datetime.now(tz=pytz.timezone('Europe/Berlin'))
+        timestamp = now.date().isoformat()
+        s3.upload_fileobj(
+            bio_new,
+            bucket,
+            f'{timestamp}/{filename}',
             ExtraArgs={
                 'ACL': 'public-read',
                 'ContentType': 'text/plain; charset=utf-8',
