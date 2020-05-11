@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 import requests
 import pandas as pd
@@ -9,7 +9,7 @@ import pytz
 import sentry_sdk
 
 from data.inhabitants import inhabitants
-from data.studios import studios
+from data.studios import studios, link_for_district
 from utils.storage import upload_dataframe
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
@@ -145,10 +145,20 @@ def clear_data():
     df['Infizierte pro 100.000'] = (
         df.Infizierte * 100000 / df.Einwohner).round(1)
 
+    infections_7_days_ago = pd.read_csv('./data/infection_history.csv')
+    now = datetime.now(tz=pytz.timezone('Europe/Berlin'))
+    timestamp = (now - timedelta(days=7)).date().isoformat()
+    infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', timestamp]]
+    df = df.merge(infections_7_days_ago, on='Landkreis/ kreisfreie Stadt', validate='one_to_one')
+    df['Neuinfektionen vergangene 7 Tage'] = df.Infizierte - df[timestamp]
+    df = df.drop(columns=[timestamp])
+    df['7-Tage-Inzidenz'] = (df['Neuinfektionen vergangene 7 Tage']*100000 / df.Einwohner).round(1)
+
+    df['Studio-Link'] = df['Landkreis/ kreisfreie Stadt'].map(link_for_district)
+
     df['Stand'] = parse_date(response)
 
     return df
-
 
 def clear_data_nrw_gesamt():
     df1 = clear_data()
@@ -176,11 +186,11 @@ def write_data_nrw():
 
 
 if __name__ == '__main__':
-    # df = clear_data()
+    df = clear_data()
     # df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
-    df1 = clear_data()
-    df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
+    # df1 = clear_data()
+    # df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
 
     # print(df)
-    print(df1.to_csv(index=False))
+    print(df.to_csv(index=False))
