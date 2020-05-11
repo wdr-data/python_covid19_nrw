@@ -26,7 +26,7 @@ def clear_data():
 
     # Clean up data here
 
-    grouped = df.groupby('Bundesland').sum()
+    grouped = df[df['IdLandkreis'] != 11000].groupby('Bundesland').sum()
 
     def sum_of(column):
         return grouped[column]['Berlin']
