@@ -9,7 +9,7 @@ import pytz
 import sentry_sdk
 
 from data.inhabitants import inhabitants
-from data.studios import studios
+from data.studios import studios, link_for_district
 from utils.storage import upload_dataframe
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
@@ -154,10 +154,11 @@ def clear_data():
     df = df.drop(columns=[timestamp])
     df['7-Tage-Inzidenz'] = (df['Neuinfektionen vergangene 7 Tage']*100000 / df.Einwohner).round(1)
 
+    df['Studio-Link'] = df['Landkreis/ kreisfreie Stadt'].map(link_for_district)
+
     df['Stand'] = parse_date(response)
 
     return df
-
 
 def clear_data_nrw_gesamt():
     df1 = clear_data()
