@@ -10,7 +10,7 @@ import sentry_sdk
 
 from data.inhabitants import inhabitants
 from data.studios import studios, link_for_district
-from utils.storage import upload_dataframe
+from utils.storage import upload_dataframe, download_file
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
 
@@ -145,10 +145,18 @@ def clear_data():
     df['Infizierte pro 100.000'] = (
         df.Infizierte * 100000 / df.Einwohner).round(1)
 
-    infections_7_days_ago = pd.read_csv('./data/infection_history.csv')
+    infection_history = pd.read_csv('./data/infection_history.csv')
     now = datetime.now(tz=pytz.timezone('Europe/Berlin'))
     timestamp = (now - timedelta(days=7)).date().isoformat()
-    infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', timestamp]]
+
+    if timestamp in infection_history.columns:
+        infections_7_days_ago = infection_history[['Landkreis/ kreisfreie Stadt', timestamp]]
+    else:
+        bio = download_file(f'{timestamp}/corona_mags_nrw.csv')
+        infections_7_days_ago = pd.read_csv(bio)
+        infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', 'Infizierte']]
+        infections_7_days_ago = infections_7_days_ago.rename(columns={'Infizierte': timestamp})
+
     df = df.merge(infections_7_days_ago, on='Landkreis/ kreisfreie Stadt', validate='one_to_one')
     df['Neuinfektionen vergangene 7 Tage'] = df.Infizierte - df[timestamp]
     df = df.drop(columns=[timestamp])
