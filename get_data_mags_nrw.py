@@ -10,7 +10,7 @@ import sentry_sdk
 
 from data.inhabitants import inhabitants
 from data.studios import studios, link_for_district
-from utils.storage import upload_dataframe
+from utils.storage import upload_dataframe, download_file
 
 url = 'https://www.mags.nrw/coronavirus-fallzahlen-nrw'
 
@@ -71,16 +71,25 @@ def parse_date(response):
 
     textBlock = soup(text=re.compile(r'Aktueller Stand: (.*)'))
 
+    date_text = ''
+
     for block in textBlock:
         re_search = re.search('Aktueller Stand: (.*)(\.)', block)
         if re_search:
-            dateText = re_search.group(1)
-            dateText = dateText.replace('  ', ' ')
-        if not dateText:
-            sentry_sdk.capture_message('Datumsformat hat sich geändert')
-            meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
-            dateText = meta_date.get('content')
-    return dateText
+            date_text = re_search.group(1)
+            date_text = date_text.replace('  ', ' ')
+            date = dateparser.parse(date_text, languages=['de'])
+
+    if not date_text:
+        sentry_sdk.capture_message('Datumsformat hat sich geändert')
+        meta_date = soup.find('meta', attrs={'name': 'dc.date.modified'})
+        date_text = meta_date.get('content')
+        date = dateparser.parse(date_text)
+        date_text = date.strftime('%d.%m.%Y')
+
+    assert date is not None, "Date could not be parsed"
+
+    return date, date_text
 
 
 def get_data():
@@ -95,6 +104,8 @@ def get_data():
 
 def clear_data():
     df, response = get_data()
+
+    site_date, date_text = parse_date(response)
 
     expected_columns = [
         'Landkreis/ kreisfreie Stadt',
@@ -145,10 +156,17 @@ def clear_data():
     df['Infizierte pro 100.000'] = (
         df.Infizierte * 100000 / df.Einwohner).round(1)
 
-    infections_7_days_ago = pd.read_csv('./data/infection_history.csv')
-    now = datetime.now(tz=pytz.timezone('Europe/Berlin'))
-    timestamp = (now - timedelta(days=7)).date().isoformat()
-    infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', timestamp]]
+    infection_history = pd.read_csv('./data/infection_history.csv')
+    timestamp = (site_date - timedelta(days=7)).date().isoformat()
+
+    if timestamp in infection_history.columns:
+        infections_7_days_ago = infection_history[['Landkreis/ kreisfreie Stadt', timestamp]]
+    else:
+        bio = download_file(f'{timestamp}/corona_mags_nrw.csv')
+        infections_7_days_ago = pd.read_csv(bio)
+        infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', 'Infizierte']]
+        infections_7_days_ago = infections_7_days_ago.rename(columns={'Infizierte': timestamp})
+
     df = df.merge(infections_7_days_ago, on='Landkreis/ kreisfreie Stadt', validate='one_to_one')
     df['Neuinfektionen vergangene 7 Tage'] = df.Infizierte - df[timestamp]
     df = df.drop(columns=[timestamp])
@@ -156,7 +174,7 @@ def clear_data():
 
     df['Studio-Link'] = df['Landkreis/ kreisfreie Stadt'].map(link_for_district)
 
-    df['Stand'] = parse_date(response)
+    df['Stand'] = date_text
 
     return df
 
@@ -192,5 +210,5 @@ if __name__ == '__main__':
     # df1 = clear_data()
     # df1 = df1[df1['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
 
-    # print(df)
-    print(df.to_csv(index=False))
+    print(df)
+    # print(df.to_csv(index=False))

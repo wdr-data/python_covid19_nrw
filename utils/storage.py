@@ -7,11 +7,21 @@ from botocore.exceptions import ClientError
 from boto3 import client
 import sentry_sdk
 
-
-def upload_dataframe(df, filename, change_notifcation=None):
+try:
     s3 = client('s3')
     bucket = os.environ["BUCKET_NAME"]
+except:
+    print('Warning: s3 client not created')
 
+
+def download_file(filename):
+    bio = BytesIO()
+    s3.download_fileobj(bucket, filename, bio)
+    bio.seek(0)
+    return bio
+
+
+def upload_dataframe(df, filename, change_notifcation=None):
     # Convert to csv and encode to get bytes
     write = df.to_csv(index=False).encode('utf-8')
 
