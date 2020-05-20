@@ -145,7 +145,10 @@ def clear_data():
     df.Todesfälle = df.Todesfälle.replace(u'-', 0)
     df.Todesfälle = df.Todesfälle.astype('int')
 
-    df['Genesene*'] = df['Genesene*'].replace('-', 'k.A.')
+    df['Genesene*'] = df['Genesene*'].replace(u'\xa0', u' ')
+    df['Genesene*'] = df['Genesene*'].replace(u' ', 0)
+    df['Genesene*'] = df['Genesene*'].replace(u'-', 0)
+    df['Genesene*'] = df['Genesene*'].astype('int')
 
     df_inhabitants = pd.DataFrame(inhabitants.items(), columns=[
                                   'Landkreis/ kreisfreie Stadt', 'Einwohner'])
@@ -156,6 +159,9 @@ def clear_data():
     df.Einwohner = df.Einwohner.astype('int')
     df['Infizierte pro 100.000'] = (
         df.Infizierte * 100000 / df.Einwohner).round(1)
+
+    df['Aktuell Infizierte'] = (
+        df['Infizierte'] - df['Genesene*'] - df['Todesfälle']).round(1)
 
     infection_history = pd.read_csv('./data/infection_history.csv')
     timestamp = (site_date - timedelta(days=7)).date().isoformat()
@@ -206,7 +212,7 @@ def write_data_nrw():
 
 
 if __name__ == '__main__':
-    df = clear_data_nrw_gesamt()
+    df = clear_data()
     # df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     # df1 = clear_data()
