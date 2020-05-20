@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, time, timedelta
+from functools import lru_cache
 
 import requests
 import pandas as pd
@@ -91,7 +92,7 @@ def parse_date(response):
 
     return date, date_text
 
-
+@lru_cache
 def get_data():
     response = requests.get(url)
     assert bool(response), 'Laden der Mags-Seite fehlgeschlagen'
@@ -101,7 +102,7 @@ def get_data():
     df = pd.DataFrame(table)
     return df, response
 
-
+@lru_cache
 def clear_data():
     df, response = get_data()
 
@@ -163,7 +164,8 @@ def clear_data():
         infections_7_days_ago = infection_history[['Landkreis/ kreisfreie Stadt', timestamp]]
     else:
         bio = download_file(f'{timestamp}/corona_mags_nrw.csv')
-        infections_7_days_ago = pd.read_csv(bio)
+        bio_all = download_file(f'{timestamp}/corona_mags_nrw_gesamt.csv')
+        infections_7_days_ago = pd.read_csv(bio).append(pd.read_csv(bio_all), ignore_index=True)
         infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', 'Infizierte']]
         infections_7_days_ago = infections_7_days_ago.rename(columns={'Infizierte': timestamp})
 
@@ -204,7 +206,7 @@ def write_data_nrw():
 
 
 if __name__ == '__main__':
-    df = clear_data()
+    df = clear_data_nrw_gesamt()
     # df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     # df1 = clear_data()
