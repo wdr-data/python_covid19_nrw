@@ -134,7 +134,7 @@ def clear_data():
     df['Landkreis/ kreisfreie Stadt'] = df['Landkreis/ kreisfreie Stadt'].str.strip()
 
     # wtf
-    df = df.replace('24Ennepe-Ruhr-Kreis', 'Ennepe-Ruhr-Kreis')
+    df = df.replace('1:971', '1971')
 
     df.Infizierte = df.Infizierte.replace(u'\xa0', u' ')
     df.Infizierte = df.Infizierte.replace(u' ', 0)
