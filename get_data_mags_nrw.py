@@ -163,22 +163,32 @@ def clear_data():
     df['Aktuell Infizierte'] = (
         df['Infizierte'] - df['Genesene*'] - df['Todesfälle']).round(1)
 
-    infection_history = pd.read_csv('./data/infection_history.csv')
+    # 7 days delta
     timestamp = (site_date - timedelta(days=7)).date().isoformat()
 
-    if timestamp in infection_history.columns:
-        infections_7_days_ago = infection_history[['Landkreis/ kreisfreie Stadt', timestamp]]
-    else:
-        bio = download_file(f'{timestamp}/corona_mags_nrw.csv')
-        bio_all = download_file(f'{timestamp}/corona_mags_nrw_gesamt.csv')
-        infections_7_days_ago = pd.read_csv(bio).append(pd.read_csv(bio_all), ignore_index=True)
-        infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', 'Infizierte']]
-        infections_7_days_ago = infections_7_days_ago.rename(columns={'Infizierte': timestamp})
+    bio = download_file(f'{timestamp}/corona_mags_nrw.csv')
+    bio_all = download_file(f'{timestamp}/corona_mags_nrw_gesamt.csv')
+    infections_7_days_ago = pd.read_csv(bio).append(pd.read_csv(bio_all), ignore_index=True)
+    infections_7_days_ago = infections_7_days_ago[['Landkreis/ kreisfreie Stadt', 'Infizierte']]
+    infections_7_days_ago = infections_7_days_ago.rename(columns={'Infizierte': timestamp})
 
     df = df.merge(infections_7_days_ago, on='Landkreis/ kreisfreie Stadt', validate='one_to_one')
     df['Neuinfektionen vergangene 7 Tage'] = df.Infizierte - df[timestamp]
     df = df.drop(columns=[timestamp])
-    df['7-Tage-Inzidenz'] = (df['Neuinfektionen vergangene 7 Tage']*100000 / df.Einwohner).round(1)
+    df['7-Tage-Inzidenz'] = (df['Neuinfektionen vergangene 7 Tage'] * 100000 / df.Einwohner).round(1)
+
+    # 1 day delta
+    timestamp = (site_date - timedelta(days=1)).date().isoformat()
+
+    bio = download_file(f'{timestamp}/corona_mags_nrw.csv')
+    bio_all = download_file(f'{timestamp}/corona_mags_nrw_gesamt.csv')
+    infections_1_day_ago = pd.read_csv(bio).append(pd.read_csv(bio_all), ignore_index=True)
+    infections_1_day_ago = infections_1_day_ago[['Landkreis/ kreisfreie Stadt', 'Infizierte']]
+    infections_1_day_ago = infections_1_day_ago.rename(columns={'Infizierte': timestamp})
+
+    df = df.merge(infections_1_day_ago, on='Landkreis/ kreisfreie Stadt', validate='one_to_one')
+    df['Neuinfektionen seit gestern'] = df.Infizierte - df[timestamp]
+    df = df.drop(columns=[timestamp])
 
     df['Studio-Link'] = df['Landkreis/ kreisfreie Stadt'].map(link_for_district)
 
