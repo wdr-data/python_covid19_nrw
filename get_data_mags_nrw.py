@@ -187,7 +187,7 @@ def clear_data():
     infections_1_day_ago = infections_1_day_ago.rename(columns={'Infizierte': timestamp})
 
     df = df.merge(infections_1_day_ago, on='Landkreis/ kreisfreie Stadt', validate='one_to_one')
-    df['Neuinfektionen seit gestern'] = df.Infizierte - df[timestamp]
+    df['Neuinfektionen zum Vortag'] = df.Infizierte - df[timestamp]
     df = df.drop(columns=[timestamp])
 
     df['Studio-Link'] = df['Landkreis/ kreisfreie Stadt'].map(link_for_district)
