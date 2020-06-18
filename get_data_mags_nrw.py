@@ -119,7 +119,8 @@ def clear_data():
         assert column in df.columns, 'Spaltenkopf in Mags-Daten geändert'
 
     if len(df.columns) > len(expected_columns):
-        sentry_sdk.capture_message('Neue Spalte in Mags-Daten')
+        unknown_columns = ', '.join(set(df.columns) - set(expected_columns))
+        sentry_sdk.capture_message(f'Neue Spalte(n) in Mags-Daten: {unknown_columns}')
 
     df["Infizierte (RKI)"] = df["Bestätigte Fälle (IfSG)"]
     df = df.rename(columns={"Bestätigte Fälle (IfSG)": "Infizierte"})
