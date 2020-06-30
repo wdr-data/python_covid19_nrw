@@ -115,7 +115,7 @@ def write_data_rki_ndr_districts_nrw():
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     upload_dataframe(
-        df, filename, change_notifcation=f'RKI-Daten für NRW aktualisiert', compare=compare)
+        df, filename, change_notification=f'RKI-Daten für NRW aktualisiert', compare=compare)
 
     for studio, areas in studios.items():
         df_studio = df[df['Landkreis/ kreisfreie Stadt'].isin(areas)]

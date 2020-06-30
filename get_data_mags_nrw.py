@@ -214,7 +214,7 @@ def write_data_nrw():
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     upload_dataframe(
-        df, filename, change_notifcation=f'Mags-Daten aktualisiert')
+        df, filename, change_notification=f'Mags-Daten aktualisiert')
 
     for studio, areas in studios.items():
         df_studio = df[df['Landkreis/ kreisfreie Stadt'].isin(areas)]

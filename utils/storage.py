@@ -40,7 +40,7 @@ def download_file(filename):
     return bio
 
 
-def upload_dataframe(df, filename, *, change_notifcation=None, compare=None):
+def upload_dataframe(df, filename, *, change_notification=None, compare=None):
 
     if compare is None:
         compare = simple_compare
@@ -61,8 +61,8 @@ def upload_dataframe(df, filename, *, change_notifcation=None, compare=None):
 
     if compare_failed or not compare(bio_old.read(), write):
         # Notify
-        if change_notifcation and not compare_failed:
-            sentry_sdk.capture_message(change_notifcation)
+        if change_notification and not compare_failed:
+            sentry_sdk.capture_message(change_notification)
 
         # Create new file-like object for upload
         bio_new = BytesIO(write)
