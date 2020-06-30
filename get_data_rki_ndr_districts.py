@@ -21,6 +21,7 @@ def get_data():
     return df, response
 
 
+@lru_cache
 def clear_data():
     df, response = get_data()
 
