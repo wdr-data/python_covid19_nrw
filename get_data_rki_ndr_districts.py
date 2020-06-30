@@ -1,10 +1,12 @@
 from functools import lru_cache
 from io import BytesIO
+from datetime import datetime
 
 import requests
 import pandas as pd
+from pytz import timezone
 
-from utils.storage import upload_dataframe
+from utils.storage import upload_dataframe, make_df_compare_fn
 
 url = 'https://ndrdata-corona-datastore.storage.googleapis.com/rki_api/current_cases_regions.csv'
 
@@ -69,6 +71,9 @@ def clear_data():
 
     df = df.rename(columns={"IdLandkreis": "ID"})
 
+    # Add update date
+    df['Stand'] = datetime.now(timezone('Europe/Berlin')).strftime('%d.%m.%y 0:00 Uhr')
+
     return df
 
 
@@ -76,7 +81,8 @@ def write_data_rki_ndr_districts():
     df = clear_data()
     filename = 'rki_ndr_districts.csv'
 
-    upload_dataframe(df, filename)
+    compare = make_df_compare_fn(ignore_columns=['Stand'])
+    upload_dataframe(df, filename, compare=compare)
 
 
 # If the file is executed directly, print cleaned data

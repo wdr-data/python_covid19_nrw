@@ -1,10 +1,12 @@
 from functools import lru_cache
 from io import BytesIO
+from datetime import datetime
 
 import requests
 import pandas as pd
+from pytz import timezone
 
-from utils.storage import upload_dataframe
+from utils.storage import upload_dataframe, make_df_compare_fn
 from data.studios import studios, link_for_district
 from get_data_rki_ndr_districts import get_data
 
@@ -87,7 +89,7 @@ def clear_data():
     df['Aktuell Infizierte'] = (
         df['Infizierte'] - df['Genesene*'] - df['Todesfälle']).round(1)
     df['Studio-Link'] = df['Landkreis/ kreisfreie Stadt'].map(link_for_district)
-    df['Stand'] = "0 Uhr, heute"
+    df['Stand'] = datetime.now(timezone('Europe/Berlin')).strftime('%d.%m.%y 0:00 Uhr')
 
     return df
 
@@ -99,9 +101,12 @@ def clear_data_nrw_gesamt():
 
 
 def write_data_rki_ndr_districts_nrw():
+    # Make compare function
+    compare = make_df_compare_fn(ignore_columns=['Stand'])
+
     filename_gesamt = 'rki_ndr_districts_nrw_gesamt.csv'
     df_gesamt = clear_data_nrw_gesamt()
-    upload_dataframe(df_gesamt, filename_gesamt)
+    upload_dataframe(df_gesamt, filename_gesamt, compare=compare)
 
     filename = 'rki_ndr_districts_nrw.csv'
     df = clear_data()
@@ -110,12 +115,12 @@ def write_data_rki_ndr_districts_nrw():
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     upload_dataframe(
-        df, filename, change_notifcation=f'RKI-Daten für NRW aktualisiert')
+        df, filename, change_notifcation=f'RKI-Daten für NRW aktualisiert', compare=compare)
 
     for studio, areas in studios.items():
         df_studio = df[df['Landkreis/ kreisfreie Stadt'].isin(areas)]
         filename_studio = f'rki_ndr_districts_nrw_{studio}.csv'
-        upload_dataframe(df_studio, filename_studio)
+        upload_dataframe(df_studio, filename_studio, compare=compare)
 
 
 # If the file is executed directly, print cleaned data
