@@ -1,7 +1,9 @@
 import os
 from io import BytesIO
 from datetime import datetime
+
 import pytz
+import pandas as pd
 
 from botocore.exceptions import ClientError
 from boto3 import client
@@ -14,6 +16,25 @@ except:
     print('Warning: s3 client not created')
 
 
+def simple_compare(old, new):
+    return old == new
+
+
+def make_df_compare_fn(*, ignore_columns=None):
+
+    def is_equal(old, new):
+        old = pd.read_csv(BytesIO(old))
+        new = pd.read_csv(BytesIO(new))
+
+        if ignore_columns is not None:
+            old = old.drop(columns=ignore_columns, errors='ignore')
+            new = new.drop(columns=ignore_columns, errors='ignore')
+
+        return old.equals(new)
+
+    return is_equal
+
+
 def download_file(filename):
     bio = BytesIO()
     s3.download_fileobj(bucket, filename, bio)
@@ -21,7 +42,11 @@ def download_file(filename):
     return bio
 
 
-def upload_dataframe(df, filename, change_notifcation=None):
+def upload_dataframe(df, filename, *, change_notification=None, compare=None):
+
+    if compare is None:
+        compare = simple_compare
+
     # Convert to csv and encode to get bytes
     write = df.to_csv(index=False).encode('utf-8')
 
@@ -36,10 +61,10 @@ def upload_dataframe(df, filename, change_notifcation=None):
 
     bio_old.seek(0)
 
-    if bio_old.read() != write:
+    if compare_failed or not compare(bio_old.read(), write):
         # Notify
-        if change_notifcation and not compare_failed:
-            sentry_sdk.capture_message(change_notifcation)
+        if change_notification and not compare_failed:
+            sentry_sdk.capture_message(change_notification)
 
         # Create new file-like object for upload
         bio_new = BytesIO(write)

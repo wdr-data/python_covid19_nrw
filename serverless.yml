@@ -21,7 +21,7 @@ functions:
     events:
       - schedule:
           name: ${self:service}-${self:provider.stage}-scrape
-          rate: rate(3 minutes)
+          rate: rate(15 minutes)
           enabled: true
 
 plugins:
