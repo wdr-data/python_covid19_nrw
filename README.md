@@ -5,7 +5,7 @@
 - Clean data in Pandas dataframe
 - Convert dataframe to .csv
 - Store .csv in S3 bucket as text file
-- Deploy scraper to AWS lambda and run it there every 3 minutes
+- Deploy scraper to AWS lambda and run it there every 15 minutes
 
 ## Creating a new scraper
 - Create a copy of the `scraper_template.py` file or one of the existing scrapers
@@ -25,4 +25,4 @@
 ## Error reporting
 - Any errors in a scraper are reported to Sentry
 - Use asserts to confirm the data is valid
-- If non-critical but interesting changes to the data are noticed, report them to Slack via webhook
+- If non-critical but interesting changes to the data are noticed, report them to Slack via Sentry message
