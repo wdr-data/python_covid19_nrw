@@ -86,6 +86,8 @@ def clear_data():
     df = adjust_for_2019(df)
 
     # Fix types
+    df['IdLandkreis'] = df['IdLandkreis'].astype('int')
+    df['IdBundesland'] = df['IdBundesland'].astype('int')
     df['Faelle'] = df['Faelle'].astype('int')
     df['FaelleDelta'] = df['FaelleDelta'].astype('int')
     df['Todesfaelle'] = df['Todesfaelle'].astype('int')
