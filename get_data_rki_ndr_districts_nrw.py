@@ -8,7 +8,7 @@ from pytz import timezone
 
 from utils.storage import upload_dataframe, make_df_compare_fn
 from data.studios import studios, link_for_district
-from get_data_rki_ndr_districts import get_data
+from get_data_rki_ndr_districts import get_data, adjust_for_2019
 
 
 @lru_cache
@@ -18,8 +18,11 @@ def clear_data():
     # Filter for the state we care about <3
     df = df[df['Bundesland'] == 'Nordrhein-Westfalen']
 
+    # Adjust population statistics from 2018 to 2019
+    df = adjust_for_2019(df)
+
     # Create a datapoint for all of NRW
-    grouped = df[df['IdLandkreis'] != 11000].groupby('Bundesland').sum()
+    grouped = df.groupby('Bundesland').sum()
 
     def sum_of(column):
         return grouped[column]['Nordrhein-Westfalen']
@@ -27,9 +30,9 @@ def clear_data():
     population = sum_of('population')
 
     gesamt = {
-        'IdLandkreis': 5999,
+        'IdLandkreis': '05999',
         'Bundesland': 'Nordrhein-Westfalen',
-        'IdBundesland': 5,
+        'IdBundesland': '05',
         'Landkreis': 'Gesamt',
         'Faelle': sum_of('Faelle'),
         'FaelleDelta': sum_of('FaelleDelta'),
@@ -126,5 +129,5 @@ def write_data_rki_ndr_districts_nrw():
 # If the file is executed directly, print cleaned data
 if __name__ == '__main__':
     df = clear_data()
-    print(df)
-    print(df.to_csv(index=False))
+    #print(df)
+    df.to_csv('rki_nrw_2019.csv', index=False, encoding='utf-8', line_terminator='\n')
