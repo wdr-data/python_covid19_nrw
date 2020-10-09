@@ -23,8 +23,8 @@ def simple_compare(old, new):
 def make_df_compare_fn(*, ignore_columns=None):
 
     def is_equal(old, new):
-        old = pd.read_csv(BytesIO(old))
-        new = pd.read_csv(BytesIO(new))
+        old = pd.read_csv(BytesIO(old), dtype='str')
+        new = pd.read_csv(BytesIO(new), dtype='str')
 
         if ignore_columns is not None:
             old = old.drop(columns=ignore_columns, errors='ignore')
