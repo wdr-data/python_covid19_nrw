@@ -1,7 +1,8 @@
 from functools import lru_cache
 
 import pandas as pd
-from datetime import date, timedelta, datetime
+import datetime as dt
+import pytz
 
 from data.inhabitants_de import inhabitants_de
 from data.studios import studios
@@ -83,12 +84,13 @@ def write_data_divi():
 
     # Check if there is new data in divi csv
     # Use all unique values in "daten_stand"-column in case there are different dates
-    dates_list = [datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date() for date in df.daten_stand.unique()]
+    dates_list = [dt.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date() for date in df.daten_stand.unique()]
     # use only latest date from all dates in divi file
     datenstand_divi = max(dates_list)
 
     # Get yesterdays date and compare
-    yesterday = date.today() - timedelta(days = 1) 
+    today = dt.datetime.now(pytz.timezone('Europe/Berlin')).date()
+    yesterday = today - dt.timedelta(days = 1) 
 
     # Update only if there is new data
     if(datenstand_divi > yesterday):
@@ -125,7 +127,7 @@ def write_data_divi():
 
         # Store same data plus current date as dict to append to archive
         ger_all_today = {
-            'X.1': date.today(),
+            'X.1': today,
             'Freie Betten': df_ger_all_base['betten_frei'],
             'Patienten (nicht COVID-19)': df_ger_all_base['betten_belegt'] - df_ger_all_base['faelle_covid_aktuell'],
             'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'],
@@ -134,7 +136,7 @@ def write_data_divi():
 
         # Subset df with only Covid cases
         sum_ger_covid_today = {
-            'X.1': date.today(),
+            'X.1': today,
             'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'],
             'COVID-19 Patienten (beatmet)': df_ger_all_base['faelle_covid_aktuell_beatmet']
         }
@@ -172,14 +174,102 @@ def write_data_divi():
 # If the file is executed directly, print cleaned data
 if __name__ == '__main__':
     df = clear_data()
-    print(df.to_csv(index=False))
+    # print(df.to_csv(index=False))
 
+    # Prep: Create filenames for all dfs 
+    fn_ger_map = 'intensivregister_karte_de.csv'
+    fn_nrw_map = 'intensivregister_karte_nrw.csv'
+    fn_ger_all = 'intensivregister_alle_heute.csv'
+    fn_ger_all_archive = 'intensivregister_alle_archiv.csv'
+    fn_ger_covid_archive = 'intensivregister_covid_archiv.csv'
+
+
+    # Check if there is new data in divi csv
+    # Use all unique values in "daten_stand"-column in case there are different dates
+    dates_list = [dt.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date() for date in df.daten_stand.unique()]
+    # use only latest date from all dates in divi file
+    datenstand_divi = max(dates_list)
+
+    # Get yesterdays date and compare
+    today = dt.datetime.now(pytz.timezone('Europe/Berlin')).date()
+    yesterday = today - dt.timedelta(days = 1) 
+
+    # Update only if there is new data
+    if(datenstand_divi > yesterday):
+    
+        # Germany: latlong + places + all numbers for current day
+        df_ger_map = df
+
+        # NRW: latlong + places + all numbers for current day
+        df_nrw_map = df[df['bundesland'] == 'Nordrhein-Westfalen']
+
+        # Germany: summarize values for current day
+        # Aggregate data to get totals for Germany
+        df_ger_all_base = df.agg({
+            'betten_belegt': 'sum',
+            'betten_frei': 'sum',
+            'betten_gesamt': 'sum',
+            'faelle_covid_aktuell': 'sum',
+            'faelle_covid_aktuell_beatmet': 'sum'
+            })
+
+        # Create dict as base for df in desired format
+        ger_all_data = {
+            'Intensivbetten': ['Freie Betten', 'Patienten (nicht COVID-19)', 'COVID-19 Patienten (nicht beatmet)', 'COVID-19 Patienten (beatmet)'],
+            'Anzahl': [
+                df_ger_all_base['betten_frei'], 
+                df_ger_all_base['betten_belegt'] - df_ger_all_base['faelle_covid_aktuell'],
+                df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'], 
+                df_ger_all_base['faelle_covid_aktuell_beatmet']
+                ]
+        }
+
+        # Create df from dict
+        df_ger_all = pd.DataFrame(data = ger_all_data)
+
+        # Store same data plus current date as dict to append to archive
+        ger_all_today = {
+            'X.1': today,
+            'Freie Betten': df_ger_all_base['betten_frei'],
+            'Patienten (nicht COVID-19)': df_ger_all_base['betten_belegt'] - df_ger_all_base['faelle_covid_aktuell'],
+            'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'],
+            'COVID-19 Patienten (beatmet)': df_ger_all_base['faelle_covid_aktuell_beatmet']
+        }
+
+        # Subset df with only Covid cases
+        sum_ger_covid_today = {
+            'X.1': today,
+            'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'],
+            'COVID-19 Patienten (beatmet)': df_ger_all_base['faelle_covid_aktuell_beatmet']
+        }
+
+        # Fetch archived data and add current row
+
+        # Filepath for archive with all columns
+        fp_all_archive = str(yesterday) + "/" + fn_ger_all_archive
+        # df_ger_all_archive = pd.read_csv(download_file(fp_all_archive))
+
+        # Local testing:
+        df_ger_all_archive = pd.read_csv('data/divi_archive_all.csv')
+
+        # Append today's data to archive
+        df_ger_all_archive = df_ger_all_archive.append(ger_all_today, ignore_index=True)
+
+        # Filepath for COVID columns only
+        fp_covid_archive = str(yesterday) + "/" + fn_ger_covid_archive
+        # df_ger_covid_archive = pd.read_csv(download_file(fp_covid_archive))
+
+        # Local testing:
+        df_ger_covid_archive = pd.read_csv('data/divi_archive_covid.csv')
+
+        # Append today's data to archive
+        df_ger_covid_archive = df_ger_covid_archive.append(sum_ger_covid_today, ignore_index=True)
 
     # paste code from write_data() for local testing             
         # print(fn_ger_map)
         # print(df_ger_map.head().to_csv(index=False))
         # print(fn_nrw_map)
-        # print(df_nrw_map.head().to_csv(index=False))
+        print(df_nrw_map.to_csv(index=False))
         # print(fn_ger_all)
         # print(df_ger_all.to_csv(index=False))
         # print(fn_ger_all_archive)
