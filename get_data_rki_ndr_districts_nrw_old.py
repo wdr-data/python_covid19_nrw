@@ -8,7 +8,7 @@ from pytz import timezone
 
 from utils.storage import upload_dataframe, make_df_compare_fn
 from data.studios import studios, link_for_district
-from get_data_rki_ndr_districts import get_data, adjust_for_2019
+from get_data_rki_ndr_districts_old import get_data, adjust_for_2019
 
 
 @lru_cache
