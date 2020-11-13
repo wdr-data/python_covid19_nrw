@@ -14,7 +14,25 @@ from get_data_rki_ndr_districts import get_data
 @lru_cache
 def clear_data():
     df, response = get_data()
-    df = df.rename(columns={'Faelle_Delta': 'FaelleDelta'})
+
+    columns = [
+        "IdLandkreis",
+        "Bundesland",
+        "IdBundesland",
+        "Landkreis",
+        "Faelle",
+        "FaelleDelta",
+        "Todesfaelle",
+        "TodesfaelleDelta",
+        "Genesen",
+        "GenesenDelta",
+        "population",
+        "Inzidenz",
+        "Todesrate",
+        "NeueFaelleLetzte7Tage",
+        "InzidenzLetzte7Tage",
+    ]
+    df = df[columns]
 
     # Filter for the state we care about <3
     df = df[df['Bundesland'] == 'Nordrhein-Westfalen']

@@ -28,7 +28,24 @@ def get_data():
 def clear_data():
     df, response = get_data()
 
-    df = df.rename(columns={'Faelle_Delta': 'FaelleDelta'})
+    columns = [
+        "IdLandkreis",
+        "Bundesland",
+        "IdBundesland",
+        "Landkreis",
+        "Faelle",
+        "FaelleDelta",
+        "Todesfaelle",
+        "TodesfaelleDelta",
+        "Genesen",
+        "GenesenDelta",
+        "population",
+        "Inzidenz",
+        "Todesrate",
+        "NeueFaelleLetzte7Tage",
+        "InzidenzLetzte7Tage",
+    ]
+    df = df[columns]
 
     # Fix types
     df['IdLandkreis'] = df['IdLandkreis'].astype('int')
