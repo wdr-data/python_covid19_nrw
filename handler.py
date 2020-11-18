@@ -21,7 +21,6 @@ from get_data_divi import write_data_divi
 
 # Add your scraper here ⬇️, without () at the end
 SCRAPERS = [
-    write_data_nrw,
     write_data_rki,
     write_data_jh_ts_global,
     write_data_jh_ts_filtered,
