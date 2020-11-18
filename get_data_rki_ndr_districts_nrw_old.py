@@ -8,34 +8,18 @@ from pytz import timezone
 
 from utils.storage import upload_dataframe, make_df_compare_fn
 from data.studios import studios, link_for_district
-from get_data_rki_ndr_districts import get_data
+from get_data_rki_ndr_districts_old import get_data, adjust_for_2019
 
 
 @lru_cache
 def clear_data():
     df, response = get_data()
 
-    columns = [
-        "IdLandkreis",
-        "Bundesland",
-        "IdBundesland",
-        "Landkreis",
-        "Faelle",
-        "FaelleDelta",
-        "Todesfaelle",
-        "TodesfaelleDelta",
-        "Genesen",
-        "GenesenDelta",
-        "population",
-        "Inzidenz",
-        "Todesrate",
-        "NeueFaelleLetzte7Tage",
-        "InzidenzLetzte7Tage",
-    ]
-    df = df[columns]
-
     # Filter for the state we care about <3
     df = df[df['Bundesland'] == 'Nordrhein-Westfalen']
+
+    # Adjust population statistics from 2018 to 2019
+    df = adjust_for_2019(df)
 
     # Create a datapoint for all of NRW
     grouped = df.groupby('Bundesland').sum()
@@ -70,7 +54,10 @@ def clear_data():
     df = df.reset_index(drop=True)
 
     # Rename districts
-    df['Landkreis'] = df['Landkreis'].replace('Städteregion Aachen (einschl. Stadt Aachen)', 'Städteregion Aachen')
+    df['Landkreis'] = df['Landkreis'].str.replace('SK ', '')
+    df['Landkreis'] = df['Landkreis'].str.replace('LK ', '')
+    df['Landkreis'] = df['Landkreis'].replace('StadtRegion Aachen', 'Städteregion Aachen')
+    df['Landkreis'] = df['Landkreis'].replace('Mülheim a.d.Ruhr', 'Mülheim an der Ruhr')
 
     # Fix datatypes
     df['Faelle'] = df['Faelle'].astype('int')
@@ -116,26 +103,26 @@ def clear_data_nrw_gesamt():
     return df
 
 
-def write_data_rki_ndr_districts_nrw():
+def write_data_rki_ndr_districts_nrw_old():
     # Make compare function
     compare = make_df_compare_fn(ignore_columns=['Stand'])
 
-    filename_gesamt = 'rki_ndr_districts_nrw_gesamt.csv'
+    filename_gesamt = 'rki_ndr_districts_nrw_gesamt_old.csv'
     df_gesamt = clear_data_nrw_gesamt()
     upload_dataframe(df_gesamt, filename_gesamt, compare=compare)
 
-    filename = 'rki_ndr_districts_nrw.csv'
+    filename = 'rki_ndr_districts_nrw_old.csv'
     df = clear_data()
 
     # Remove 'Gesamt' from DF
     df = df[df['Landkreis/ kreisfreie Stadt'] != 'Gesamt']
 
     upload_dataframe(
-        df, filename, change_notification=f'RKI-Daten für NRW aktualisiert (neue Datei)', compare=compare)
+        df, filename, change_notification=f'RKI-Daten für NRW aktualisiert (alte Datei)', compare=compare)
 
     for studio, areas in studios.items():
         df_studio = df[df['Landkreis/ kreisfreie Stadt'].isin(areas)]
-        filename_studio = f'rki_ndr_districts_nrw_{studio}.csv'
+        filename_studio = f'rki_ndr_districts_nrw_{studio}_old.csv'
         upload_dataframe(df_studio, filename_studio, compare=compare)
 
 
@@ -143,4 +130,4 @@ def write_data_rki_ndr_districts_nrw():
 if __name__ == '__main__':
     df = clear_data()
     #print(df)
-    df.to_csv('rki_ndr_districts_nrw.csv', index=False, encoding='utf-8', line_terminator='\n')
+    df.to_csv('rki_ndr_districts_nrw_old.csv', index=False, encoding='utf-8', line_terminator='\n')

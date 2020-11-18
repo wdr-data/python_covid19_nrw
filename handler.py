@@ -15,6 +15,8 @@ from get_data_mags_nrw import write_data_nrw
 from get_data_rki import write_data_rki
 from get_data_rki_ndr_districts import write_data_rki_ndr_districts
 from get_data_rki_ndr_districts_nrw import write_data_rki_ndr_districts_nrw
+from get_data_rki_ndr_districts_old import write_data_rki_ndr_districts_old
+from get_data_rki_ndr_districts_nrw_old import write_data_rki_ndr_districts_nrw_old
 from get_data_divi import write_data_divi
 
 # Add your scraper here ⬇️, without () at the end
@@ -26,6 +28,8 @@ SCRAPERS = [
     write_data_jh_global,
     write_data_rki_ndr_districts,
     write_data_rki_ndr_districts_nrw,
+    write_data_rki_ndr_districts_old,
+    write_data_rki_ndr_districts_nrw_old,
     write_data_divi,
 ]
 
