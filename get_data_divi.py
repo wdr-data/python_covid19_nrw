@@ -8,7 +8,7 @@ from data.inhabitants_de import inhabitants_de
 from data.studios import studios
 from utils.storage import upload_dataframe, download_file
 
-url = 'http://www.divi.de/DIVI-Intensivregister-Tagesreport.csv'
+url = 'https://diviexchange.blob.core.windows.net/%24web/DIVI_Intensivregister_Auszug_pro_Landkreis.csv'
 
 @lru_cache
 def get_data():
