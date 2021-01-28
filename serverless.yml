@@ -5,6 +5,8 @@ provider:
   region: eu-central-1
   runtime: python3.8
   stage: ${env:STAGE}
+  stackTags:
+    PRODUCT: coronascraper-nrw
   environment:
     BUCKET_NAME: "coronanrw-${self:provider.stage}"
     SENTRY_URI: ${env:SENTRY_URI}
