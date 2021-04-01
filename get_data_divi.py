@@ -58,7 +58,7 @@ def clear_data():
 
     # retain only necessary columns
     df = df[['lat', 'lon', 'gemeindeschluessel', 'ort', 'bundesland_y', 'studio', 
-         'faelle_covid_aktuell', 'faelle_covid_aktuell_beatmet',
+         'faelle_covid_aktuell', 'faelle_covid_aktuell_invasiv_beatmet',
          'anzahl_standorte', 'betten_frei', 'betten_belegt', 'betten_gesamt', 'betten_auslastung',
          'daten_stand']]
 
@@ -108,7 +108,7 @@ def write_data_divi():
             'betten_frei': 'sum',
             'betten_gesamt': 'sum',
             'faelle_covid_aktuell': 'sum',
-            'faelle_covid_aktuell_beatmet': 'sum'
+            'faelle_covid_aktuell_invasiv_beatmet': 'sum'
             })
 
         # Create dict as base for df in desired format
@@ -117,8 +117,8 @@ def write_data_divi():
             'Anzahl': [
                 df_ger_all_base['betten_frei'], 
                 df_ger_all_base['betten_belegt'] - df_ger_all_base['faelle_covid_aktuell'],
-                df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'], 
-                df_ger_all_base['faelle_covid_aktuell_beatmet']
+                df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet'], 
+                df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet']
                 ]
         }
 
@@ -130,15 +130,15 @@ def write_data_divi():
             'X.1': today,
             'Freie Betten': df_ger_all_base['betten_frei'],
             'Patienten (nicht COVID-19)': df_ger_all_base['betten_belegt'] - df_ger_all_base['faelle_covid_aktuell'],
-            'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'],
-            'COVID-19 Patienten (beatmet)': df_ger_all_base['faelle_covid_aktuell_beatmet']
+            'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet'],
+            'COVID-19 Patienten (beatmet)': df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet']
         }
 
         # Subset df with only Covid cases
         sum_ger_covid_today = {
             'X.1': today,
-            'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_beatmet'],
-            'COVID-19 Patienten (beatmet)': df_ger_all_base['faelle_covid_aktuell_beatmet']
+            'COVID-19 Patienten (nicht beatmet)': df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet'],
+            'COVID-19 Patienten (beatmet)': df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet']
         }
 
         # Fetch archived data and add current row
