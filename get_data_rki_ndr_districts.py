@@ -47,7 +47,7 @@ def clear_data():
     ]
     df = df[columns]
 
-    df = df.replace("NA", 0)
+    df = df.fillna(0)
 
     # Fix types
     df['IdLandkreis'] = df['IdLandkreis'].astype('int')
