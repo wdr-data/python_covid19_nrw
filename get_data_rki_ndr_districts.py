@@ -47,6 +47,8 @@ def clear_data():
     ]
     df = df[columns]
 
+    df = df.fillna(0)
+
     # Fix types
     df['IdLandkreis'] = df['IdLandkreis'].astype('int')
     df['IdBundesland'] = df['IdBundesland'].astype('int')
