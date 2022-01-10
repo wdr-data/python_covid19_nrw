@@ -84,7 +84,7 @@ def write_data_divi():
 
     # Check if there is new data in divi csv
     # Use all unique values in "daten_stand"-column in case there are different dates
-    dates_list = [dt.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date() for date in df.daten_stand.unique()]
+    dates_list = [dt.datetime.strptime(date, '%Y-%m-%d %H:%M:%S%z').date() for date in df.daten_stand.unique()]
     # use only latest date from all dates in divi file
     datenstand_divi = max(dates_list)
 
