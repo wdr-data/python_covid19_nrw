@@ -10,6 +10,8 @@ from utils.storage import upload_dataframe, download_file
 
 url = 'https://diviexchange.blob.core.windows.net/%24web/DIVI_Intensivregister_Auszug_pro_Landkreis.csv'
 
+TZ_BERLIN = pytz.timezone('Europe/Berlin')
+
 @lru_cache
 def get_data():
     # Download DIVI csv
@@ -38,7 +40,7 @@ def clear_data():
 
     # Calculate number of total beds
     df['betten_gesamt'] = df['betten_frei'] + df['betten_belegt']
-    
+
     # Calculate percentage of occupied beds
     df['betten_auslastung'] = df['betten_belegt'] / df['betten_gesamt'] * 100
 
@@ -57,7 +59,7 @@ def clear_data():
     df = df.merge(df_studio, on='kreisname', how='left')
 
     # retain only necessary columns
-    df = df[['lat', 'lon', 'gemeindeschluessel', 'ort', 'bundesland_y', 'studio', 
+    df = df[['lat', 'lon', 'gemeindeschluessel', 'ort', 'bundesland_y', 'studio',
          'faelle_covid_aktuell', 'faelle_covid_aktuell_invasiv_beatmet',
          'anzahl_standorte', 'betten_frei', 'betten_belegt', 'betten_gesamt', 'betten_auslastung',
          'daten_stand']]
@@ -74,7 +76,7 @@ def write_data_divi():
     # Prep: Get new data
     df = clear_data()
 
-    # Prep: Create filenames for all dfs 
+    # Prep: Create filenames for all dfs
     fn_ger_map = 'intensivregister_karte_de.csv'
     fn_nrw_map = 'intensivregister_karte_nrw.csv'
     fn_ger_all = 'intensivregister_alle_heute.csv'
@@ -89,12 +91,15 @@ def write_data_divi():
     datenstand_divi = max(dates_list)
 
     # Get yesterdays date and compare
-    today = dt.datetime.now(pytz.timezone('Europe/Berlin')).date()
-    yesterday = today - dt.timedelta(days = 1) 
+    today = dt.datetime.now(TZ_BERLIN).date()
+    yesterday = today - dt.timedelta(days = 1)
 
     # Update only if there is new data
     if(datenstand_divi > yesterday):
-    
+
+        # Parse date, convert to Berlin time and format back to string
+        df.daten_stand = df.daten_stand.transform(lambda date: dt.datetime.strptime(date, '%Y-%m-%d %H:%M:%S%z').astimezone(TZ_BERLIN).strftime("%Y-%m-%d %H:%M:%S"))
+
         # Germany: latlong + places + all numbers for current day
         df_ger_map = df
 
@@ -115,9 +120,9 @@ def write_data_divi():
         ger_all_data = {
             'Intensivbetten': ['Freie Betten', 'Patienten (nicht COVID-19)', 'COVID-19 Patienten (nicht beatmet)', 'COVID-19 Patienten (beatmet)'],
             'Anzahl': [
-                df_ger_all_base['betten_frei'], 
+                df_ger_all_base['betten_frei'],
                 df_ger_all_base['betten_belegt'] - df_ger_all_base['faelle_covid_aktuell'],
-                df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet'], 
+                df_ger_all_base['faelle_covid_aktuell'] - df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet'],
                 df_ger_all_base['faelle_covid_aktuell_invasiv_beatmet']
                 ]
         }
@@ -176,7 +181,7 @@ if __name__ == '__main__':
     df = clear_data()
     # print(df.to_csv(index=False))
 
-    # paste code from write_data() for local testing             
+    # paste code from write_data() for local testing
         # print(fn_ger_map)
         # print(df_ger_map.head().to_csv(index=False))
         # print(fn_nrw_map)
@@ -187,4 +192,3 @@ if __name__ == '__main__':
         # print(df_ger_all_archive.tail().to_csv(index=False))
         # print(fn_ger_covid_archive)
         # print(df_ger_covid_archive.tail().to_csv(index=False))
-
