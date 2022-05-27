@@ -15,6 +15,7 @@ from get_data_rki_ndr_districts_nrw import write_data_rki_ndr_districts_nrw
 from get_data_divi import write_data_divi
 from get_data_rki_github_hospitalization import write_data_rki_github_hospitalization
 from get_data_rki_github_vaccination import write_data_rki_github_vaccination
+from get_data_arcgis_nrw_icu import write_data_arcgis_nrw_icu
 
 # Add your scraper here ⬇️, without () at the end
 SCRAPERS = [
@@ -24,6 +25,7 @@ SCRAPERS = [
     write_data_divi,
     write_data_rki_github_hospitalization,
     write_data_rki_github_vaccination,
+    write_data_arcgis_nrw_icu,
 ]
 
 
