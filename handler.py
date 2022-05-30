@@ -9,27 +9,25 @@ sentry_sdk.init(os.environ['SENTRY_URI'],
                 integrations=[AwsLambdaIntegration()])
 
 # Import your scraper here ⬇️
-from get_data_jh_global import write_data_jh_global
-from get_data_jh_ts_global_confirmed import write_data_jh_ts_global, write_data_jh_ts_filtered
-from get_data_mags_nrw import write_data_nrw
 from get_data_rki import write_data_rki
 from get_data_rki_ndr_districts import write_data_rki_ndr_districts
 from get_data_rki_ndr_districts_nrw import write_data_rki_ndr_districts_nrw
-from get_data_rki_ndr_districts_old import write_data_rki_ndr_districts_old
-from get_data_rki_ndr_districts_nrw_old import write_data_rki_ndr_districts_nrw_old
+from get_data_rki_ndr_history import write_data_rki_ndr_history
 from get_data_divi import write_data_divi
+from get_data_rki_github_hospitalization import write_data_rki_github_hospitalization
+from get_data_rki_github_vaccination import write_data_rki_github_vaccination
+from get_data_arcgis_nrw_icu import write_data_arcgis_nrw_icu
 
 # Add your scraper here ⬇️, without () at the end
 SCRAPERS = [
     write_data_rki,
-    write_data_jh_ts_global,
-    write_data_jh_ts_filtered,
-    write_data_jh_global,
     write_data_rki_ndr_districts,
     write_data_rki_ndr_districts_nrw,
-    write_data_rki_ndr_districts_old,
-    write_data_rki_ndr_districts_nrw_old,
+    write_data_rki_ndr_history,
     write_data_divi,
+    write_data_rki_github_hospitalization,
+    write_data_rki_github_vaccination,
+    write_data_arcgis_nrw_icu,
 ]
 
 
