@@ -18,7 +18,7 @@ def get_data_adjusted():
     )
 
     # Parse into data frame
-    df = pd.read_csv(StringIO(response.text), sep=",", decimal=".", low_memory=False)
+    df = pd.read_csv(StringIO(response.text), sep=",", decimal=".", low_memory=False, parse_dates=["Datum"])
 
     return df, response
 
@@ -48,6 +48,13 @@ def write_data_rki_github_hospitalization():
 
     upload_dataframe(df_adj_bund, "rki_github_hosp_adj_bund.csv")
     upload_dataframe(df_adj_nrw, "rki_github_hosp_adj_nrw.csv")
+
+    # Save version with only last 90 days
+    df_adj_bund_90 = df_adj_bund[df_adj_bund["Datum"] >= df_adj_bund["Datum"].max() - pd.Timedelta(days=90)]
+    df_adj_nrw_90 = df_adj_nrw[df_adj_nrw["Datum"] >= df_adj_nrw["Datum"].max() - pd.Timedelta(days=90)]
+
+    upload_dataframe(df_adj_bund_90, "rki_github_hosp_adj_bund_90.csv")
+    upload_dataframe(df_adj_nrw_90, "rki_github_hosp_adj_nrw_90.csv")
 
 
 # If the file is executed directly, print cleaned data
