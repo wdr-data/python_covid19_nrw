@@ -24,6 +24,7 @@ def get_data():
 
 def clear_data_current():
     df, response = get_data()
+    df = df.copy()
 
     df_bund = df[(df.Bundesland == "Deutschland")]
     df_nrw = df[(df.Bundesland == "Nordrhein-Westfalen")]
@@ -66,6 +67,7 @@ def make_demo_table(df):
 
 def clear_data_demo():
     df, response = get_data()
+    df = df.copy()
 
     df_bund = df[(df.Bundesland == "Deutschland")]
     df_nrw = df[(df.Bundesland == "Nordrhein-Westfalen")]
