@@ -17,6 +17,7 @@ from get_data_rki_ndr_districts_history import write_data_rki_ndr_districts_hist
 from get_data_divi import write_data_divi
 from get_data_rki_github_hospitalization import write_data_rki_github_hospitalization
 from get_data_rki_github_vaccination import write_data_rki_github_vaccination
+from get_data_rki_github_r import write_data_rki_github_r
 from get_data_arcgis_nrw_icu import write_data_arcgis_nrw_icu
 from get_data_dashboard import write_data_dashboard
 
@@ -30,6 +31,7 @@ SCRAPERS = [
     write_data_divi,
     write_data_rki_github_hospitalization,
     write_data_rki_github_vaccination,
+    write_data_rki_github_r,
     write_data_arcgis_nrw_icu,
     write_data_dashboard,
 ]
