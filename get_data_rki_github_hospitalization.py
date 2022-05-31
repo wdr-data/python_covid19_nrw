@@ -25,6 +25,7 @@ def get_data_adjusted():
 
 def clear_data_adjusted():
     df, response = get_data_adjusted()
+    df = df.copy()
 
     df_gesamt = df[(df.Altersgruppe == "00+")]
     df_gesamt.drop(

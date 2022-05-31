@@ -27,6 +27,7 @@ def get_data():
 
 def clear_data():
     df, response = get_data()
+    df = df.copy()
 
     keep_cols = [
         "datum_text",

@@ -111,7 +111,7 @@ def clear_data():
 
 
 def clear_data_nrw_gesamt():
-    df = clear_data()
+    df = clear_data().copy()
     df = df[df['Landkreis/ kreisfreie Stadt'] == 'Gesamt']
     return df
 
