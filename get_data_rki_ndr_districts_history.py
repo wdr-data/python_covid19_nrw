@@ -34,6 +34,8 @@ def clean_data():
 
     df = pd.concat([districts] + incidence_columns, axis=1)
 
+    df.sort_values(by="Landkreis/ kreisfreie Stadt", inplace=True)
+
     return df
 
 
