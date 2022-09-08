@@ -1,0 +1,11 @@
+beautifulsoup4
+boto3
+botocore
+certifi
+dateparser
+lxml
+numpy
+pandas
+pytz
+requests
+sentry-sdk
