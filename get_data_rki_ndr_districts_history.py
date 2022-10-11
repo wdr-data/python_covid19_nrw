@@ -3,6 +3,7 @@ import datetime as dt
 import pandas as pd
 
 from utils.storage import download_file, upload_dataframe
+from data.studios import studios
 
 
 def get_data():
@@ -39,9 +40,17 @@ def clean_data():
     return df
 
 
+def data_by_studio(df: pd.DataFrame, studio: str):
+    return df[df["Landkreis/ kreisfreie Stadt"].isin(studios[studio])]
+
+
 def write_data_rki_ndr_districts_history():
     df = clean_data()
     upload_dataframe(df, "rki_ndr_districts_nrw_history.csv")
+
+    for studio in studios.keys():
+        df_studio = data_by_studio(df, studio)
+        upload_dataframe(df_studio, f"rki_ndr_districts_nrw_history_{studio}.csv")
 
 
 if __name__ == "__main__":
