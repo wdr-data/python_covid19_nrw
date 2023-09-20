@@ -6,7 +6,7 @@ import pandas as pd
 
 from utils.storage import upload_dataframe
 
-url = "https://raw.githubusercontent.com/robert-koch-institut/COVID-19-Impfungen_in_Deutschland/master/Aktuell_Deutschland_Impfquoten_COVID-19.csv"
+url = "https://raw.githubusercontent.com/robert-koch-institut/COVID-19-Impfungen_in_Deutschland/master/Deutschland_Impfquoten_COVID-19.csv"
 
 
 @lru_cache
