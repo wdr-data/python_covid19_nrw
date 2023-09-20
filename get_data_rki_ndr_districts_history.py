@@ -1,5 +1,6 @@
 import datetime as dt
 
+from botocore.exceptions import ClientError
 import pandas as pd
 
 from utils.storage import download_file, upload_dataframe
@@ -45,7 +46,12 @@ def data_by_studio(df: pd.DataFrame, studio: str):
 
 
 def write_data_rki_ndr_districts_history():
-    df = clean_data()
+    try:
+        df = clean_data()
+    except ClientError as e:
+        print(e)
+        return
+
     upload_dataframe(df, "rki_ndr_districts_nrw_history.csv")
 
     for studio in studios.keys():
