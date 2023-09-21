@@ -35,7 +35,15 @@ jobs:
       - name: Deploy to staging
         if: github.ref == 'refs/heads/master'
         run: STAGE=staging npx serverless deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Deploy to production
         if: github.ref == 'refs/heads/production'
         run: STAGE=prod npx serverless deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
