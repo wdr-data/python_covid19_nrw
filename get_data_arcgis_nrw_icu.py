@@ -10,7 +10,7 @@ url = "https://www.arcgishostedserver.nrw.de/arcgis/rest/services/Hosted/COVID_1
 @lru_cache
 def get_data():
     # Download website
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     assert bool(response), "Laden der ARCGIS-NRW-Daten fehlgeschlagen ({} - {})".format(
         response.status_code, url
     )

@@ -12,7 +12,7 @@ url_adjusted = "https://raw.githubusercontent.com/robert-koch-institut/COVID-19-
 @lru_cache
 def get_data_adjusted():
     # Download website
-    response = requests.get(url_adjusted)
+    response = requests.get(url_adjusted, timeout=10)
     assert bool(response), "Laden der RKI-GitHub-Daten fehlgeschlagen ({} - {})".format(
         response.status_code, url_adjusted
     )
