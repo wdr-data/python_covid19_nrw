@@ -1,0 +1,38 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - master
+      - production
+
+env:
+  AWS_REGION: eu-central-1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "12"
+
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to staging
+        if: github.ref == 'refs/heads/master'
+        run: STAGE=staging npx serverless deploy
+
+      - name: Deploy to production
+        if: github.ref == 'refs/heads/production'
+        run: STAGE=prod npx serverless deploy
