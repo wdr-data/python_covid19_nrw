@@ -12,7 +12,7 @@ url = "https://raw.githubusercontent.com/robert-koch-institut/SARS-CoV-2-Nowcast
 @lru_cache
 def get_data():
     # Download website
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     assert bool(response), "Laden der RKI-GitHub-Daten fehlgeschlagen ({} - {})".format(
         response.status_code, url
     )

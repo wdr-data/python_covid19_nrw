@@ -15,7 +15,7 @@ url = 'https://storage.googleapis.com/ndrdata-csv-cors/csv/current_cases_regions
 @lru_cache
 def get_data():
     # Download website
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     assert bool(response), 'Laden der RKI-NDR-Daten fehlgeschlagen'
 
     # Parse into data frame

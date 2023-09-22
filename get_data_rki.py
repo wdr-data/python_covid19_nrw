@@ -17,7 +17,7 @@ url = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_La
 
 def get_data(url):
 
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     json_data = json.loads(r.text)
 
     df = pd.DataFrame(json_data['features'])
